@@ -120,6 +120,9 @@ export default function Navbar({ toggleSidebar }) {
               <Button variant="outline" asChild>
                 <Link href="/auth/login">Sign In</Link>
               </Button>
+              <Button asChild>
+                <Link href="/auth/register">Register</Link>
+              </Button>
             </div>
           )}
         </div>

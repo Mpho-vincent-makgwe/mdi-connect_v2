@@ -1,4 +1,4 @@
-// app/api/user/route.js
+// app/api/auth/user/route.js
 import { dbConnect } from '@/lib/dbConnect';
 import User from '@/models/User';
 

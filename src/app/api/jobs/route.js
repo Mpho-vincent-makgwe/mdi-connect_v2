@@ -1,5 +1,5 @@
 // app/api/jobs/route.js
-import { dbConnect } from '@/lib/dbConnect';
+import { dbConnect } from '@/lib/db';
 import Job from '@/models/Job';
 
 export async function GET() {
