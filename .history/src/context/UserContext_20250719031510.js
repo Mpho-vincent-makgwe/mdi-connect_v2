@@ -69,20 +69,17 @@ export function UserProvider({ children }) {
       });
 
       const data = await response.json();
-    console.log('Login response data:', data); // Add this line
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Login failed');
+      
+      if (data.success) {
+        localStorage.setItem('token', data.token);
+        setUser(data.user);
+        return data.user;
+      } else {
+        throw new Error(data.error || 'Login failed');
+      }
+    } catch (error) {
+      throw error;
     }
-    
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', data.user);
-    setUser(data.user);
-    return data.user;
-  } catch (error) {
-    console.error('Login error:', error);
-    throw error;
-  }
   };
 
   const register = async (userData) => {

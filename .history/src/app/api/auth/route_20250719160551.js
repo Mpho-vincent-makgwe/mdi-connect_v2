@@ -54,7 +54,7 @@ export async function POST(req) {
         }
         
         // Direct string comparison (INSECURE!)
-        const validPassword = (data.password === foundUser.password);
+        const validPassword = data.password === foundUser.password;
         console.log('Password match result:', validPassword);
         
         if (!validPassword) {

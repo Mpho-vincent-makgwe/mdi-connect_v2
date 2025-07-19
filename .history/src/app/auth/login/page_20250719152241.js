@@ -26,7 +26,7 @@ export default function Login() {
       if (!user.completedQuestionnaire) {
         router.push('/questionnaire');
       } else {
-        router.push('/');
+        router.push('/dashboard');
       }
     }
   } catch (err) {

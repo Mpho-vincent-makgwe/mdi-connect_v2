@@ -15,16 +15,16 @@ export async function POST(req) {
 
   try {
     switch (action) {
-       case 'register': {
+      case 'register': {
         const existingUser = await User.findOne({ email: data.email });
         if (existingUser) {
           return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
         }
 
-        // Store plain text password (INSECURE!)
+        // const hashedPassword = await bcrypt.hash(data.password, 15);
         const user = await User.create({ 
           ...data, 
-          password: data.password, // INSECURE
+          password: data.password,
           role: data.role || 'unskilled'
         });
 
@@ -46,20 +46,26 @@ export async function POST(req) {
       }
 
       case 'login': {
-        console.log('Login attempt for:', data.email);
-        const foundUser = await User.findOne({ email: data.email });
-        if (!foundUser) {
-          console.log('User not found');
-          return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-        }
-        
-        // Direct string comparison (INSECURE!)
-        const validPassword = (data.password === foundUser.password);
-        console.log('Password match result:', validPassword);
-        
-        if (!validPassword) {
-          return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-        }
+         console.log('Login attempt for:', data.email);
+          const foundUser = await User.findOne({ email: data.email });
+          if (!foundUser) {
+            console.log('User not found');
+            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+          }
+          
+          console.log('Stored hash:', foundUser.password);
+          console.log('Input password:', data.password);
+          
+          // Add this debug comparison
+          const hash = await bcrypt.hash(data.password, 15);
+          console.log('New hash of input password:', hash);
+          
+          const validPassword = await bcrypt.compare(hash, foundUser.password);
+          console.log('Password match result:', validPassword);
+          
+          if (!validPassword) {
+            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+          }
 
         const loginToken = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET, {
           expiresIn: '1d',

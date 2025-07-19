@@ -76,7 +76,6 @@ export function UserProvider({ children }) {
     }
     
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', data.user);
     setUser(data.user);
     return data.user;
   } catch (error) {

@@ -16,26 +16,17 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
-  try {
-    const user = await login(credentials.email, credentials.password);
-    console.log('Logged in user:', user);
-    if (user) {
-      if (!user.completedQuestionnaire) {
-        router.push('/questionnaire');
-      } else {
-        router.push('/');
-      }
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await login(credentials.email, credentials.password);
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Login error:', err);
-    setError(err.message || 'Login failed');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

@@ -1,6 +1,6 @@
 import { dbConnect } from '@/lib/db';
 import User from '@/models/User';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 
@@ -15,16 +15,16 @@ export async function POST(req) {
 
   try {
     switch (action) {
-       case 'register': {
+      case 'register': {
         const existingUser = await User.findOne({ email: data.email });
         if (existingUser) {
           return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
         }
 
-        // Store plain text password (INSECURE!)
+        const hashedPassword = await bcrypt.hash(data.password, 10);
         const user = await User.create({ 
           ...data, 
-          password: data.password, // INSECURE
+          password: hashedPassword,
           role: data.role || 'unskilled'
         });
 
@@ -46,17 +46,14 @@ export async function POST(req) {
       }
 
       case 'login': {
-        console.log('Login attempt for:', data.email);
+         console.log('Login attempt for:', data.email);
         const foundUser = await User.findOne({ email: data.email });
         if (!foundUser) {
           console.log('User not found');
           return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
         
-        // Direct string comparison (INSECURE!)
-        const validPassword = (data.password === foundUser.password);
-        console.log('Password match result:', validPassword);
-        
+        const validPassword = await bcrypt.compare(data.password, foundUser.password);
         if (!validPassword) {
           return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
