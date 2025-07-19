@@ -1,17 +1,15 @@
 // app/layout.js
-
-import { GeistSans } from 'geist/font/sans';
 import './globals.css';
 import LayoutWrapper from './LayoutWrapper';
 
 export const metadata = {
-  title: 'MDI-Connect Recruitment Web Application',
-  description: 'Employee leave management system',
+  title: 'TalentLink - Recruitment Platform',
+  description: 'Connecting skilled professionals with opportunities in Mining, Tourism, and Manufacturing',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={GeistSans.className}>
+    <html lang="en" className={``}>
       <body suppressHydrationWarning className="bg-gray-50">
         <LayoutWrapper>
           {children}

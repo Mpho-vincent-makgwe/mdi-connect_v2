@@ -1,28 +1,34 @@
+// app/LayoutWrapper.js
 'use client';
 
 import { usePathname } from 'next/navigation';
 import { SearchProvider } from '@/context/SearchContext';
 import { UserProvider } from "@/context/UserContext";
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
+import { JobsProvider } from "@/context/JobsContext";
+import Navbar from '@/components/Navbar';
+import Sidebar from '@/components/Sidebar';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
-  const isAuthRoute = pathname?.startsWith('/auth');
+  const hideLayout = pathname?.startsWith('/auth') || pathname?.startsWith('/questionnaire');
 
   return (
     <UserProvider>
-      <SearchProvider>
-        <div className="flex h-screen overflow-hidden">
-          {!isAuthRoute && <Sidebar />}
-          <div className={`flex-1 flex flex-col overflow-hidden ${!isAuthRoute ? 'lg:ml-64' : ''} pb-16 lg:pb-0`}>
-            {!isAuthRoute && <Navbar />}
-            <main className={`flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50 ${!isAuthRoute ? 'mt-16' : ''}`}>
-              {children}
-            </main>
+      <JobsProvider>
+        <SearchProvider>
+          <div className="flex h-screen overflow-hidden bg-gray-50">
+            {!hideLayout && <Sidebar />}
+            <div className={`flex-1 flex flex-col overflow-hidden ${!hideLayout ? 'lg:ml-64' : ''}`}>
+              {!hideLayout && <Navbar />}
+              <main className={`flex-1 overflow-y-auto ${!hideLayout ? 'p-6 mt-16' : 'p-0'}`}>
+                {children}
+              </main>
+            </div>
           </div>
-        </div>
-      </SearchProvider>
+          <Toaster />
+        </SearchProvider>
+      </JobsProvider>
     </UserProvider>
   );
 }
