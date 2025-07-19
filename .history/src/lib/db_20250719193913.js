@@ -16,11 +16,14 @@ export async function dbConnect(dbName = 'MDI-Connect') {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      dbName,
-      useNewUrlParser: true,
-    useUnifiedTopology: true
-    }).then(mongoose => mongoose);
+    cached.promise = // Add these options to your connection:
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  connectTimeoutMS: 30000, // 30 seconds
+  socketTimeoutMS: 30000,
+  serverSelectionTimeoutMS: 5000 // Keep trying for 5 seconds
+});.then(mongoose => mongoose);
   }
 
   cached.conn = await cached.promise;

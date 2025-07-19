@@ -37,7 +37,7 @@ export default function Sidebar() {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useUser();
-
+  
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -155,15 +155,11 @@ export default function Sidebar() {
         </ul>
       </nav>
       <div className="p-4 border-t">
-        <Button 
-          variant="outline" 
-          className="w-full" 
-          onClick={logout()} // Add onClick handler here
-        >
-          <div className="flex items-center gap-2">
+        <Button variant="outline" className="w-full" asChild>
+          <Link href="/auth/logout" className="flex items-center gap-2">
             <FiLogOut className="h-4 w-4" />
             <span>Logout</span>
-          </div>
+          </Link>
         </Button>
       </div>
     </aside>

@@ -19,8 +19,6 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useUser } from "@/context/UserContext";
-
 
 const menuItems = [
   { label: "Dashboard", icon: <FiHome />, href: "/" },
@@ -36,7 +34,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useUser();
 
   useEffect(() => {
     const handleResize = () => {
@@ -155,15 +152,11 @@ export default function Sidebar() {
         </ul>
       </nav>
       <div className="p-4 border-t">
-        <Button 
-          variant="outline" 
-          className="w-full" 
-          onClick={logout()} // Add onClick handler here
-        >
-          <div className="flex items-center gap-2">
+        <Button variant="outline" className="w-full" asChild>
+          <Link href="/auth/logout" className="flex items-center gap-2">
             <FiLogOut className="h-4 w-4" />
             <span>Logout</span>
-          </div>
+          </Link>
         </Button>
       </div>
     </aside>

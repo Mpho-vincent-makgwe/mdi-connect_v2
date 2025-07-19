@@ -19,7 +19,7 @@ export async function dbConnect(dbName = 'MDI-Connect') {
     cached.promise = mongoose.connect(MONGODB_URI, {
       dbName,
       useNewUrlParser: true,
-    useUnifiedTopology: true
+  useUnifiedTopology: true
     }).then(mongoose => mongoose);
   }
 

@@ -64,11 +64,11 @@ export async function POST(req) {
           console.log('Password match result:', validPassword);
           
           if (!validPassword) {
-            console.log('Password comparison failed');
-            return NextResponse.json({ 
-              error: 'Invalid email or password' 
-            }, { status: 401 });
-          }
+  console.log('Password comparison failed');
+  return NextResponse.json({ 
+    error: 'Invalid email or password' 
+  }, { status: 401 });
+}
 
         const loginToken = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET, {
           expiresIn: '1d',

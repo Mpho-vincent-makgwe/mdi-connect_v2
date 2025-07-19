@@ -68,7 +68,7 @@ export async function POST(req) {
             return NextResponse.json({ 
               error: 'Invalid email or password' 
             }, { status: 401 });
-          }
+}
 
         const loginToken = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET, {
           expiresIn: '1d',

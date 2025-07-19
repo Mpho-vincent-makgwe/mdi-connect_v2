@@ -158,7 +158,7 @@ export default function Sidebar() {
         <Button 
           variant="outline" 
           className="w-full" 
-          onClick={logout()} // Add onClick handler here
+          onClick={ogout} // Add onClick handler here
         >
           <div className="flex items-center gap-2">
             <FiLogOut className="h-4 w-4" />

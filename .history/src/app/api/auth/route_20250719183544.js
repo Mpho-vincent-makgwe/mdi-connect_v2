@@ -12,6 +12,7 @@ if (!process.env.JWT_SECRET) {
 export async function POST(req) {
   await dbConnect();
   const { action, ...data } = await req.json();
+  
 
   try {
     switch (action) {
@@ -21,7 +22,7 @@ export async function POST(req) {
           return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
         }
 
-        const hashedPassword = await bcrypt.hash(data.password, 150);
+        
         const user = await User.create({ 
           ...data, 
           password: hashedPassword,
@@ -57,17 +58,14 @@ export async function POST(req) {
           console.log('Input password:', data.password);
           
           // Add this debug comparison
-          const hash = await bcrypt.hash(data.password, 10);
+          const hash = await bcrypt.hash(data.password, 15);
           console.log('New hash of input password:', hash);
           
-          const validPassword = await bcrypt.compare(data.password, foundUser.password);
+          const validPassword = await bcrypt.compare(hash, foundUser.password);
           console.log('Password match result:', validPassword);
           
           if (!validPassword) {
-            console.log('Password comparison failed');
-            return NextResponse.json({ 
-              error: 'Invalid email or password' 
-            }, { status: 401 });
+            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
           }
 
         const loginToken = jwt.sign({ id: foundUser._id }, process.env.JWT_SECRET, {

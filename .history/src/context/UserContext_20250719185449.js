@@ -103,7 +103,7 @@ export function UserProvider({ children }) {
       if (data.success) {
         localStorage.setItem('token', data.token);
         setUser(data.user);
-         router.push('/auth/login');
+        
         return data.user;
       } else {
         throw new Error(data.error || 'Registration failed');

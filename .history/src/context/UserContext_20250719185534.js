@@ -78,6 +78,7 @@ export function UserProvider({ children }) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', data.user);
     setUser(data.user);
+     router.push('/auth/login');
     return data.user;
   } catch (error) {
     console.error('Login error:', error);
