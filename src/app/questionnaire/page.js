@@ -1,7 +1,7 @@
 // app/questionnaire/page.js
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -23,12 +23,63 @@ export default function Questionnaire() {
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(20);
   const [formData, setFormData] = useState({
-    sector: '',
-    experience: '',
-    qualifications: '',
-    educationLevel: '',
-    currentlyStudying: '',
+    sector: user?.sector || '',
+    experience: user?.experience || '',
+    yearsOfExperience: user?.yearsOfExperience || '',
+    qualifications: user?.qualifications || '',
+    educationLevel: user?.educationLevel || '',
+    currentlyStudying: user?.currentlyStudying || '',
   });
+
+  // Auto-save when form data changes
+  useEffect(() => {
+    const autoSave = async () => {
+      try {
+        await updateUser({
+          ...formData,
+          completedQuestionnaire: false // Keep as false until explicitly completed
+        });
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      if (Object.values(formData).some(val => val !== '')) {
+        autoSave();
+      }
+    }, 2000); // Debounce for 2 seconds
+
+    return () => clearTimeout(timer);
+  }, [formData, updateUser]);
+
+  // Load saved data on mount
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        sector: user.sector || '',
+        experience: user.experience || '',
+        yearsOfExperience: user.yearsOfExperience || '',
+        qualifications: user.qualifications || '',
+        educationLevel: user.educationLevel || '',
+        currentlyStudying: user.currentlyStudying || '',
+      });
+      
+      // Calculate current step based on filled fields
+      const filledSteps = [
+        !!user.sector,
+        !!user.experience,
+        !!user.qualifications,
+        !!user.educationLevel,
+        !!user.currentlyStudying
+      ].filter(Boolean).length;
+      
+      if (filledSteps > 0) {
+        setStep(Math.min(filledSteps + 1, 5));
+        setProgress(Math.min((filledSteps + 1) * 20, 100));
+      }
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,25 +102,39 @@ export default function Questionnaire() {
     setStep(step - 1);
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
+  try {
+    const userType = formData.qualifications === 'yes' ? 'skilled' : 'unskilled';
+    
+    await updateUser({
+      ...formData,
+      role: userType,
+      completedQuestionnaire: true
+    });
+
+    // Redirect based on user type
+    if (userType === 'skilled') {
+      router.push('/upload-qualifications');
+    } else {
+      router.push('/jobs');
+    }
+  } catch (error) {
+    console.error('Error submitting questionnaire:', error);
+  }
+};
+
+const handleSaveForLater = async () => {
     try {
-      const userType = formData.qualifications === 'yes' ? 'skilled' : 'unskilled';
-      
       await updateUser({
         ...formData,
-        role: userType,
-        completedQuestionnaire: true
+        completedQuestionnaire: false
       });
-
-      if (formData.qualifications === 'yes') {
-        router.push('/upload-qualifications');
-      } else {
-        router.push('/jobs');
-      }
+      router.push('/');
     } catch (error) {
-      console.error('Error submitting questionnaire:', error);
+      console.error('Error saving progress:', error);
     }
   };
+
 
   const renderStep = () => {
     switch (step) {
@@ -184,12 +249,7 @@ export default function Questionnaire() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">Candidate Profile Setup</h1>
-          <p className="text-gray-600">Complete your profile to access job opportunities</p>
-        </div>
-        
-        <Progress value={progress} className="h-2" />
+        {/* ... existing header and progress ... */}
         
         <div className="space-y-6">
           {renderStep()}
@@ -204,15 +264,24 @@ export default function Questionnaire() {
             <div></div>
           )}
           
-          {step < 5 ? (
-            <Button onClick={nextStep}>
-              Next
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleSaveForLater}
+            >
+              Save for Later
             </Button>
-          ) : (
-            <Button onClick={handleSubmit}>
-              Complete Profile
-            </Button>
-          )}
+            
+            {step < 5 ? (
+              <Button onClick={nextStep}>
+                Next
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit}>
+                Complete Profile
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
