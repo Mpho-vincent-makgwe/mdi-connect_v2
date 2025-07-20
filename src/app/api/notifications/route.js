@@ -17,8 +17,10 @@ export async function GET(request) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const notifications = await Notification.find({ userId: decoded.id })
+    const notifications = await Notification.find({ user: decoded.id })
       .sort({ createdAt: -1 });
+
+    // console.log("Backend notifications:", notifications);
     
     return NextResponse.json({ 
       success: true, 
@@ -27,10 +29,12 @@ export async function GET(request) {
         title: notif.title,
         message: notif.message,
         read: notif.read,
+        type: notif.type,
         createdAt: notif.createdAt
       }))
     });
   } catch (error) {
+    console.error("Error fetching notifications:", error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch notifications', error: error.message },
       { status: 500 }
@@ -54,7 +58,7 @@ export async function PATCH(request, { params }) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const notification = await Notification.findOneAndUpdate(
-      { _id: id, userId: decoded.id },
+      { _id: id, user: decoded.id },
       { read: true },
       { new: true }
     );
@@ -74,6 +78,7 @@ export async function PATCH(request, { params }) {
       }
     });
   } catch (error) {
+    console.error("Error marking notification as read:", error);
     return NextResponse.json(
       { success: false, message: 'Failed to mark notification as read', error: error.message },
       { status: 500 }

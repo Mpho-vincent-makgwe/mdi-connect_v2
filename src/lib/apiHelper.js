@@ -41,23 +41,23 @@ const apiHelper = {
     });
   },
 
-  getProfile: async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('GET', '/users/me', {}, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
-  },
+getProfile: async () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return apiHelper.request('GET', '/me', {}, {
+    headers: { 
+      Authorization: `Bearer ${token}` 
+    }
+  });
+},
 
-  updateProfile: async (updates) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('PUT', '/users/me', updates, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
-  },
+updateProfile: async (updates) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return apiHelper.request('PUT', '/me', updates, {
+    headers: { 
+      Authorization: `Bearer ${token}` 
+    }
+  });
+},
 
   // New methods for applications
   getApplications: async () => {
@@ -96,7 +96,30 @@ const apiHelper = {
         Authorization: `Bearer ${token}` 
       }
     });
-  }
+  },
+
+  getJobs: async (filters = {}) => {
+    const query = new URLSearchParams();
+    if (filters.search) query.append('search', filters.search);
+    if (filters.sector && filters.sector !== 'all') query.append('sector', filters.sector);
+    if (filters.location && filters.location !== 'all') query.append('location', filters.location);
+
+    return apiHelper.request('GET', `/jobs?${query.toString()}`);
+  },
+
+  applyForJob: async (jobId, applicationData) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('POST', '/jobs', { jobId, ...applicationData }, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
+
+  getJobDetails: async (jobId) => {
+    return apiHelper.request('GET', `/jobs/${jobId}`);
+  },
+
 };
 
 export default apiHelper;

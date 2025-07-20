@@ -51,14 +51,14 @@ export default function Navbar({ toggleSidebar }) {
     <header className="bg-white shadow-sm h-16 fixed top-0 right-0 left-0 lg:left-64 z-30 border-b border-gray-200">
       <div className="flex items-center justify-between h-full px-4 lg:px-6 w-full">
         {/* Mobile menu button */}
-        <Button 
+        {/* <Button 
           variant="ghost" 
           size="icon" 
           className="lg:hidden"
           onClick={toggleSidebar}
         >
           <FiMenu className="h-5 w-5" />
-        </Button>
+        </Button> */}
 
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center ml-2">

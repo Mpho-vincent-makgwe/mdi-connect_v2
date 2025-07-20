@@ -17,20 +17,26 @@ export async function GET(request) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const applications = await Application.find({ userId: decoded.id })
-      .populate('jobId', 'title company');
+    const applications = await Application.find({ user: decoded.id })
+      .populate('job', 'title company')
+      .sort({ appliedDate: -1 });
+
+    // console.log("Backend applications:", applications);
     
     return NextResponse.json({ 
       success: true, 
       data: applications.map(app => ({
         id: app._id,
-        jobTitle: app.jobId?.title,
-        company: app.jobId?.company,
+        jobTitle: app.job?.title,
+        company: app.job?.company,
         status: app.status,
-        appliedDate: app.appliedDate
+        appliedDate: app.appliedDate,
+        resume: app.resume,
+        coverLetter: app.coverLetter
       }))
     });
   } catch (error) {
+    console.error("Error fetching applications:", error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch applications', error: error.message },
       { status: 500 }

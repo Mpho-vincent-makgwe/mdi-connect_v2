@@ -4,7 +4,7 @@
     "title": "Application Received",
     "message": "Your application for Mining Engineer has been received",
     "type": "application",
-    "relatedEntity": {"$oid": "APPLICATION1_ID_HERE"},
+    "relatedEntity": {"$oid": "687d0cb41eec047af5bca1e6"},
     "read": false,
     "createdAt": {"$date": "2023-06-15T09:15:00Z"}
   },
@@ -13,7 +13,7 @@
     "title": "Interview Scheduled",
     "message": "Your interview for Mining Engineer has been scheduled",
     "type": "interview",
-    "relatedEntity": {"$oid": "INTERVIEW1_ID_HERE"},
+    "relatedEntity": {"$oid": "687d0cf01eec047af5bca1eb"},
     "read": false,
     "createdAt": {"$date": "2023-06-20T11:30:00Z"}
   },
@@ -22,7 +22,7 @@
     "title": "Application Reviewed",
     "message": "Your application for Tour Guide is being reviewed",
     "type": "application",
-    "relatedEntity": {"$oid": "APPLICATION2_ID_HERE"},
+    "relatedEntity": {"$oid": "687d0cb41eec047af5bca1e7"},
     "read": true,
     "createdAt": {"$date": "2023-06-18T16:45:00Z"}
   }

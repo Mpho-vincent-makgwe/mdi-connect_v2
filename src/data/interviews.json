@@ -1,7 +1,7 @@
 [
   {
     "user": {"$oid": "687ccf98adbb87148154e030"},
-    "application": {"$oid": "APPLICATION1_ID_HERE"},
+    "application": {"$oid": "687d0cb41eec047af5bca1e6"},
     "date": {"$date": "2023-06-25T14:00:00Z"},
     "type": "video",
     "status": "scheduled",
@@ -12,7 +12,7 @@
   },
   {
     "user": {"$oid": "687ccf98adbb87148154e030"},
-    "application": {"$oid": "APPLICATION2_ID_HERE"},
+    "application": {"$oid": "687d0cb41eec047af5bca1e7"},
     "date": {"$date": "2023-06-28T10:30:00Z"},
     "type": "in-person",
     "status": "scheduled",

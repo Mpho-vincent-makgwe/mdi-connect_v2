@@ -1,7 +1,7 @@
 // src/app/jobs/page.js
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useJobs } from '@/context/JobsContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,49 +16,17 @@ import JobCard from '@/components/JobCard';
 import { FiSearch, FiFilter, FiX } from 'react-icons/fi';
 
 export default function JobBoard() {
-   const { jobs = [], loading, error, fetchJobs } = useJobs();
-  console.log("front-end jobs:",jobs);
+  const { jobs, loading, error, fetchJobs } = useJobs();
   const [filters, setFilters] = useState({
     search: '',
     sector: 'all',
     location: 'all'
   });
-  const timerRef = useRef(null);
 
-  const debouncedFetchJobs = useCallback((filters) => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    timerRef.current = setTimeout(() => {
-      fetchJobs(filters);
-    }, 500);
-  }, [fetchJobs]);
-
+  // Initialize with empty filters
   useEffect(() => {
-    // Initial fetch without filters
     fetchJobs();
-    
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
   }, [fetchJobs]);
-  useEffect(() => {
-    console.log("Jobs data structure:", jobs);
-  }, [jobs]);
-
-  useEffect(() => {
-    debouncedFetchJobs(filters);
-  }, [filters, debouncedFetchJobs]);
-
-  const clearFilters = () => {
-    setFilters({
-      search: '',
-      sector: 'all',
-      location: 'all'
-    });
-  };
 
   const handleSearchChange = (e) => {
     setFilters(prev => ({...prev, search: e.target.value}));
@@ -70,6 +38,23 @@ export default function JobBoard() {
 
   const handleLocationChange = (value) => {
     setFilters(prev => ({...prev, location: value}));
+  };
+
+  // Debounce the filter changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchJobs(filters);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters, fetchJobs]);
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      sector: 'all',
+      location: 'all'
+    });
   };
 
   const hasFilters = filters.search || filters.sector !== 'all' || filters.location !== 'all';
@@ -163,22 +148,20 @@ export default function JobBoard() {
                 Retry
               </Button>
             </div>
-          ) : jobs.length > 0 ? (
+          ) : jobs && jobs.length > 0 ? (
             jobs.map(job => (
               <JobCard key={job._id} job={job} />
             ))
           ) : (
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
-              <p className="text-gray-600">No jobs found matching your criteria</p>
-              {hasFilters && (
-                <Button 
-                  variant="ghost" 
-                  className="mt-2"
-                  onClick={clearFilters}
-                >
-                  Clear filters
-                </Button>
-              )}
+              <p className="text-gray-600">No jobs found</p>
+              <Button 
+                variant="ghost" 
+                className="mt-2"
+                onClick={() => fetchJobs()}
+              >
+                Refresh
+              </Button>
             </div>
           )}
         </div>

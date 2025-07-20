@@ -9,7 +9,7 @@
   },
   {
     "user": {"$oid": "687ccf98adbb87148154e030"},
-    "job": {"$oid": "JOB2_ID_HERE"},
+    "job": {"$oid": "67afae3341b453135c68fb93"},
     "status": "reviewed",
     "appliedDate": {"$date": "2023-06-18T00:00:00Z"},
     "resume": "resumes/jane-smith-tour-guide.pdf"

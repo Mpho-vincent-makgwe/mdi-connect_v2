@@ -49,6 +49,8 @@ const InterviewsPage = () => {
     }
   }, [user, userLoading]);
 
+  console.log('Iterviews :', interviews)
+
   const filteredInterviews = interviews.filter(interview => {
     if (filter === 'all') return true;
     return interview.status === filter;

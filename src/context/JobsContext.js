@@ -2,13 +2,14 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback } from 'react';
+import apiHelper from '@/lib/apiHelper';
 
 const JobsContext = createContext();
 
 export function JobsProvider({ children }) {
   const [state, setState] = useState({
     jobs: [],
-    loading: false,
+    loading: true, // Start with loading true
     error: null
   });
 
@@ -16,25 +17,39 @@ export function JobsProvider({ children }) {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const query = {};
-      if (filters.search) query.search = filters.search;
-      if (filters.sector !== 'all') query.sector = filters.sector;
-      if (filters.location !== 'all') query.location = filters.location;
-
-      const response = await fetch(`/api/jobs?${new URLSearchParams(query)}`);
-      const data = await response.json();
+      const response = await apiHelper.getJobs(filters);
       
+      if (response.success === false) {
+        throw new Error(response.message || 'Failed to fetch jobs');
+      }
+
       setState({
-        jobs: data.jobs || [], // Access the jobs array from the response
+        jobs: response.jobs || [], // Ensure we always have an array
         loading: false,
         error: null
       });
     } catch (err) {
+      console.error('Error fetching jobs:', err);
       setState({
         jobs: [],
         loading: false,
-        error: err.message
+        error: err.message || 'Failed to fetch jobs'
       });
+    }
+  }, []);
+
+  const applyForJob = useCallback(async (jobId, applicationData) => {
+    try {
+      const response = await apiHelper.applyForJob(jobId, applicationData);
+      
+      if (response.success === false) {
+        throw new Error(response.message || 'Failed to apply for job');
+      }
+
+      return { success: true, message: response.message };
+    } catch (err) {
+      console.error('Error applying for job:', err);
+      return { success: false, message: err.message || 'Failed to apply for job' };
     }
   }, []);
 
@@ -43,7 +58,8 @@ export function JobsProvider({ children }) {
       jobs: state.jobs,
       loading: state.loading,
       error: state.error,
-      fetchJobs
+      fetchJobs,
+      applyForJob
     }}>
       {children}
     </JobsContext.Provider>
