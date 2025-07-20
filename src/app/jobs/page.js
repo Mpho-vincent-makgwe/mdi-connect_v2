@@ -1,6 +1,7 @@
+// src/app/jobs/page.js
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useJobs } from '@/context/JobsContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,16 +16,41 @@ import JobCard from '@/components/JobCard';
 import { FiSearch, FiFilter, FiX } from 'react-icons/fi';
 
 export default function JobBoard() {
-  const { jobs, loading, error, fetchJobs } = useJobs();
+   const { jobs = [], loading, error, fetchJobs } = useJobs();
+  console.log("front-end jobs:",jobs);
   const [filters, setFilters] = useState({
     search: '',
     sector: 'all',
     location: 'all'
   });
+  const timerRef = useRef(null);
+
+  const debouncedFetchJobs = useCallback((filters) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      fetchJobs(filters);
+    }, 500);
+  }, [fetchJobs]);
 
   useEffect(() => {
-    fetchJobs(filters);
-  }, [filters, fetchJobs]);
+    // Initial fetch without filters
+    fetchJobs();
+    
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [fetchJobs]);
+  useEffect(() => {
+    console.log("Jobs data structure:", jobs);
+  }, [jobs]);
+
+  useEffect(() => {
+    debouncedFetchJobs(filters);
+  }, [filters, debouncedFetchJobs]);
 
   const clearFilters = () => {
     setFilters({
@@ -32,6 +58,18 @@ export default function JobBoard() {
       sector: 'all',
       location: 'all'
     });
+  };
+
+  const handleSearchChange = (e) => {
+    setFilters(prev => ({...prev, search: e.target.value}));
+  };
+
+  const handleSectorChange = (value) => {
+    setFilters(prev => ({...prev, sector: value}));
+  };
+
+  const handleLocationChange = (value) => {
+    setFilters(prev => ({...prev, location: value}));
   };
 
   const hasFilters = filters.search || filters.sector !== 'all' || filters.location !== 'all';
@@ -64,7 +102,7 @@ export default function JobBoard() {
                 placeholder="Search jobs..."
                 className="pl-10"
                 value={filters.search}
-                onChange={(e) => setFilters({...filters, search: e.target.value})}
+                onChange={handleSearchChange}
               />
             </div>
           </div>
@@ -73,7 +111,7 @@ export default function JobBoard() {
             <h3 className="font-medium">Sector</h3>
             <Select 
               value={filters.sector}
-              onValueChange={(value) => setFilters({...filters, sector: value})}
+              onValueChange={handleSectorChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All Sectors" />
@@ -91,7 +129,7 @@ export default function JobBoard() {
             <h3 className="font-medium">Location</h3>
             <Select 
               value={filters.location}
-              onValueChange={(value) => setFilters({...filters, location: value})}
+              onValueChange={handleLocationChange}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All Locations" />

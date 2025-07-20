@@ -1,93 +1,50 @@
+// src/context/JobsContext.js
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 
 const JobsContext = createContext();
 
 export function JobsProvider({ children }) {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [session, setSession] = useState(null); // Simple session state
+  const [state, setState] = useState({
+    jobs: [],
+    loading: false,
+    error: null
+  });
 
-  // Mock function to simulate getting user session
-  const getSession = () => {
-    // In a real app, you would get this from your auth system
-    const user = localStorage.getItem('user');
-    return user ? { user: JSON.parse(user) } : null;
-  };
-
-  const fetchJobs = async (params = {}) => {
+  const fetchJobs = useCallback(async (filters = {}) => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    
     try {
-      setLoading(true);
-      const query = new URLSearchParams(params).toString();
-      const response = await fetch(`/api/jobs?${query}`);
+      const query = {};
+      if (filters.search) query.search = filters.search;
+      if (filters.sector !== 'all') query.sector = filters.sector;
+      if (filters.location !== 'all') query.location = filters.location;
+
+      const response = await fetch(`/api/jobs?${new URLSearchParams(query)}`);
       const data = await response.json();
-      console.log("data :", data)
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch jobs');
-      }
-      
-      setJobs(data.jobs);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-      setJobs([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const applyForJob = async (jobId, applicationData) => {
-    try {
-      const currentSession = getSession();
-      if (!currentSession) {
-        throw new Error('You must be logged in to apply for jobs');
-      }
-      
-      const response = await fetch('/api/jobs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jobId,
-          userId: currentSession.user.id, // Assuming your user object has an id
-          ...applicationData
-        }),
+      setState({
+        jobs: data.jobs || [], // Access the jobs array from the response
+        loading: false,
+        error: null
       });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit application');
-      }
-      
-      await fetchJobs();
-      return data;
     } catch (err) {
-      throw err;
+      setState({
+        jobs: [],
+        loading: false,
+        error: err.message
+      });
     }
-  };
-
-  useEffect(() => {
-    // Initialize session
-    setSession(getSession());
-    fetchJobs();
   }, []);
 
-  const value = {
-    jobs,
-    loading,
-    error,
-    session, // Expose session to components
-    fetchJobs,
-    applyForJob,
-  };
-
   return (
-    <JobsContext.Provider value={value}>
+    <JobsContext.Provider value={{
+      jobs: state.jobs,
+      loading: state.loading,
+      error: state.error,
+      fetchJobs
+    }}>
       {children}
     </JobsContext.Provider>
   );
@@ -95,7 +52,7 @@ export function JobsProvider({ children }) {
 
 export function useJobs() {
   const context = useContext(JobsContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useJobs must be used within a JobsProvider');
   }
   return context;
