@@ -1,0 +1,29 @@
+[
+  {
+    "user": {"$oid": "687cc3c61b8fc62b4cb3083c"},
+    "title": "Application Received",
+    "message": "Your application for Mining Engineer has been received",
+    "type": "application",
+    "relatedEntity": {"$oid": "APPLICATION1_ID_HERE"},
+    "read": false,
+    "createdAt": {"$date": "2023-06-15T09:15:00Z"}
+  },
+  {
+    "user": {"$oid": "687ccf98adbb87148154e030"},
+    "title": "Interview Scheduled",
+    "message": "Your interview for Mining Engineer has been scheduled",
+    "type": "interview",
+    "relatedEntity": {"$oid": "INTERVIEW1_ID_HERE"},
+    "read": false,
+    "createdAt": {"$date": "2023-06-20T11:30:00Z"}
+  },
+  {
+    "user": {"$oid": "687ccf98adbb87148154e030"},
+    "title": "Application Reviewed",
+    "message": "Your application for Tour Guide is being reviewed",
+    "type": "application",
+    "relatedEntity": {"$oid": "APPLICATION2_ID_HERE"},
+    "read": true,
+    "createdAt": {"$date": "2023-06-18T16:45:00Z"}
+  }
+]

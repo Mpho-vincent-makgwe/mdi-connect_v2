@@ -1,7 +1,8 @@
 'use client';
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import apiHelper from '@/lib/apiHelper';
+import { toast } from 'react-toastify';
 
 const UserContext = createContext();
 
@@ -10,10 +11,7 @@ export function UserProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // context/UserContext.js
-// context/UserContext.js
-useEffect(() => {
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       setLoading(true);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -27,7 +25,7 @@ useEffect(() => {
       
       if (response.success) {
         setUser(response.user);
-        // Only redirect if not already on questionnaire page and not completed
+        // Redirect logic for questionnaire
         const currentPath = window.location.pathname;
         if (!response.user.completedQuestionnaire && 
             !currentPath.includes('/questionnaire') &&
@@ -35,24 +33,23 @@ useEffect(() => {
           router.push('/questionnaire');
         }
       } else {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-        }
+        localStorage.removeItem('token');
         setUser(null);
+        toast.error(response.message || 'Session expired, please login again');
       }
     } catch (error) {
       console.error('Error fetching user:', error);
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-      }
+      localStorage.removeItem('token');
       setUser(null);
+      toast.error('Failed to load user profile');
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  fetchUser();
-}, [router]);
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   const login = async (email, password) => {
     try {
@@ -62,9 +59,7 @@ useEffect(() => {
         throw new Error(response.message || 'Login failed');
       }
       
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', response.token);
-      }
+      localStorage.setItem('token', response.token);
       setUser(response.user);
       
       if (!response.user.completedQuestionnaire) {
@@ -73,60 +68,55 @@ useEffect(() => {
         router.push('/');
       }
       
+      toast.success('Login successful!');
       return response.user;
     } catch (error) {
-      console.error('Login error:', error);
+      toast.error(error.message || 'Login failed');
       throw error;
     }
   };
 
   const register = async (userData) => {
     try {
-      const response = await apiHelper.register(
-        userData.name,
-        userData.email,
-        userData.password,
-        userData.role
-      );
+      const response = await apiHelper.register(userData);
       
       if (!response.success) {
         throw new Error(response.message || 'Registration failed');
       }
       
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', response.token);
-      }
+      localStorage.setItem('token', response.token);
       setUser(response.user);
       router.push('/auth/login');
+      toast.success('Registration successful! Please login.');
       return response.user;
     } catch (error) {
+      toast.error(error.message || 'Registration failed');
       throw error;
     }
   };
 
-  const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-    }
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
     setUser(null);
     router.push('/auth/login');
-  };
+    toast.info('You have been logged out');
+  }, [router]);
 
   const updateUser = async (updates) => {
-  try {
-    const response = await apiHelper.updateProfile(updates);
-    
-    if (!response.success) {
-      throw new Error(response.message || 'Update failed');
+    try {
+      const response = await apiHelper.updateProfile(updates);
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Update failed');
+      }
+      
+      setUser(response.user);
+      return response.user;
+    } catch (error) {
+      toast.error(error.message || 'Update failed');
+      throw error;
     }
-    
-    setUser(response.user);
-    return response.user;
-  } catch (error) {
-    console.error('Update error:', error);
-    throw error;
-  }
-};
+  };
 
   const value = {
     user,
@@ -134,7 +124,9 @@ useEffect(() => {
     login,
     register,
     logout,
-    updateUser
+    updateUser,
+    refreshUser: fetchUser,
+    isAuthenticated: !!user
   };
 
   return (

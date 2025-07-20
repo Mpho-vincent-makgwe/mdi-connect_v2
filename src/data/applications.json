@@ -1,0 +1,17 @@
+[
+  {
+    "user": {"$oid": "687ccf98adbb87148154e030"},
+    "job": {"$oid": "67afae3341b453135c68fb91"},
+    "status": "applied",
+    "appliedDate": {"$date": "2023-06-15T00:00:00Z"},
+    "resume": "resumes/john-doe-mining-engineer.pdf",
+    "coverLetter": "cover-letters/john-doe-mining-engineer.pdf"
+  },
+  {
+    "user": {"$oid": "687ccf98adbb87148154e030"},
+    "job": {"$oid": "JOB2_ID_HERE"},
+    "status": "reviewed",
+    "appliedDate": {"$date": "2023-06-18T00:00:00Z"},
+    "resume": "resumes/jane-smith-tour-guide.pdf"
+  }
+]

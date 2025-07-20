@@ -1,0 +1,24 @@
+[
+  {
+    "user": {"$oid": "687ccf98adbb87148154e030"},
+    "application": {"$oid": "APPLICATION1_ID_HERE"},
+    "date": {"$date": "2023-06-25T14:00:00Z"},
+    "type": "video",
+    "status": "scheduled",
+    "interviewerName": "Sarah Johnson",
+    "interviewerEmail": "sarah@miningcorp.com",
+    "meetingLink": "https://zoom.us/j/123456789",
+    "notes": "Focus on safety management experience"
+  },
+  {
+    "user": {"$oid": "687ccf98adbb87148154e030"},
+    "application": {"$oid": "APPLICATION2_ID_HERE"},
+    "date": {"$date": "2023-06-28T10:30:00Z"},
+    "type": "in-person",
+    "status": "scheduled",
+    "interviewerName": "Michael Brown",
+    "interviewerEmail": "michael@safari.com",
+    "location": "Safari Adventures HQ, 123 Main St, Cape Town",
+    "notes": "Prepare wildlife knowledge test"
+  }
+]

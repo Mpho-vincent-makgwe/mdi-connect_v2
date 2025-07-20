@@ -53,7 +53,10 @@ export async function PUT(request) {
     
     return NextResponse.json({
       success: true,
-      user
+      user : {
+    ...user._doc,
+    completedQuestionnaire: updates.completedQuestionnaire || false
+  }
     });
   } catch (error) {
     return NextResponse.json(

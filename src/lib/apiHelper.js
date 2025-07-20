@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api/auth',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json'
   }
@@ -27,12 +27,13 @@ const apiHelper = {
     }
   },
 
+  // Auth methods (unchanged)
   login: async (email, password) => {
-    return apiHelper.request('POST', '/login', { email, password });
+    return apiHelper.request('POST', '/auth/login', { email, password });
   },
 
   register: async (name, email, password, role) => {
-    return apiHelper.request('POST', '/register', { 
+    return apiHelper.request('POST', '/auth/register', { 
       name, 
       email, 
       password, 
@@ -42,7 +43,7 @@ const apiHelper = {
 
   getProfile: async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('GET', '/profile', {}, {
+    return apiHelper.request('GET', '/users/me', {}, {
       headers: { 
         Authorization: `Bearer ${token}` 
       }
@@ -50,13 +51,52 @@ const apiHelper = {
   },
 
   updateProfile: async (updates) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  return apiHelper.request('PUT', '/profile', updates, {
-    headers: { 
-      Authorization: `Bearer ${token}` 
-    }
-  });
-}
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('PUT', '/users/me', updates, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
+
+  // New methods for applications
+  getApplications: async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('GET', '/applications', {}, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
+
+  // New methods for interviews
+  getInterviews: async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('GET', '/interviews', {}, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
+
+  // New methods for notifications
+  getNotifications: async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('GET', '/notifications', {}, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
+
+  markNotificationAsRead: async (id) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('PATCH', `/notifications/${id}/read`, {}, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  }
 };
 
 export default apiHelper;
