@@ -1,0 +1,345 @@
+[{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb91"
+  },
+  "title": "Tourism Manager",
+  "company": "TravelCo",
+  "sector": "Tourism",
+  "location": "New York, USA",
+  "salary": "$90,000 - $110,000 per year",
+  "description": "Manage tourism operations and oversee the development of travel packages.",
+  "requirements": [
+    "Bachelor's degree in tourism management",
+    "Experience in the tourism industry",
+    "Leadership skills"
+  ],
+  "img": "https://linktoimage.com/tourism_manager.jpg",
+  "requiredApplicants": 3,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb93"
+  },
+  "title": "Hotel Receptionist",
+  "company": "Luxury Stay",
+  "sector": "Tourism",
+  "location": "Dubai, UAE",
+  "salary": "$30,000 - $40,000 per year",
+  "description": "Provide exceptional service at the front desk of a luxury hotel, including guest check-in and inquiries.",
+  "requirements": [
+    "Customer service experience",
+    "Fluency in English",
+    "Previous hotel receptionist experience is a plus"
+  ],
+  "img": "https://linktoimage.com/hotel_receptionist.jpg",
+  "requiredApplicants": 4,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb95"
+  },
+  "title": "Travel Consultant",
+  "company": "TravelPlus",
+  "sector": "Tourism",
+  "location": "London, UK",
+  "salary": "$60,000 - $80,000 per year",
+  "description": "Assist customers in booking travel packages, flights, and accommodations.",
+  "requirements": [
+    "Experience in travel consultation",
+    "Strong communication skills",
+    "Detail-oriented"
+  ],
+  "img": "https://linktoimage.com/travel_consultant.jpg",
+  "requiredApplicants": 5,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb8f"
+  },
+  "title": "Drill Operator",
+  "company": "Rock Drillers",
+  "sector": "Mining",
+  "location": "Queensland, Australia",
+  "salary": "$75,000 - $95,000 per year",
+  "description": "Operate drill rigs and ensure proper extraction processes in the mining operations.",
+  "requirements": [
+    "Experience in operating heavy drilling machinery",
+    "Ability to work in rugged environments",
+    "Safety certification"
+  ],
+  "img": "https://linktoimage.com/drill_operator.jpg",
+  "requiredApplicants": 2,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb90"
+  },
+  "title": "Environmental Engineer",
+  "company": "EcoMiners",
+  "sector": "Mining",
+  "location": "Montana, USA",
+  "salary": "$85,000 - $105,000 per year",
+  "description": "Develop and implement environmental protection policies for mining operations.",
+  "requirements": [
+    "Bachelor's degree in environmental engineering",
+    "Strong analytical skills",
+    "Experience with environmental impact assessments"
+  ],
+  "img": "https://linktoimage.com/environmental_engineer.jpg",
+  "requiredApplicants": 4,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb8c"
+  },
+  "title": "Mining Engineer",
+  "company": "MiningCorp",
+  "sector": "Mining",
+  "location": "Nevada, USA",
+  "salary": "$80,000 - $100,000 per year",
+  "description": "Responsible for overseeing mining operations and ensuring safety protocols are followed.",
+  "requirements": [
+    "Bachelor's degree in mining engineering",
+    "5+ years of experience",
+    "Knowledge of mining equipment"
+  ],
+  "img": "https://linktoimage.com/mining_engineer.jpg",
+  "requiredApplicants": 5,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb98"
+  },
+  "title": "Quality Control Inspector",
+  "company": "QualityFirst",
+  "sector": "Manufacturing",
+  "location": "San Francisco, USA",
+  "salary": "$50,000 - $70,000 per year",
+  "description": "Inspect and test products to ensure they meet the required quality standards.",
+  "requirements": [
+    "High school diploma or equivalent",
+    "Attention to detail",
+    "Experience with quality control systems"
+  ],
+  "img": "https://linktoimage.com/quality_control_inspector.jpg",
+  "requiredApplicants": 5,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb99"
+  },
+  "title": "Assembly Line Worker",
+  "company": "MegaManufacture",
+  "sector": "Manufacturing",
+  "location": "Dallas, USA",
+  "salary": "$35,000 - $50,000 per year",
+  "description": "Work on the assembly line to assemble products and ensure efficient manufacturing processes.",
+  "requirements": [
+    "Ability to work in a fast-paced environment",
+    "Manual dexterity",
+    "Previous manufacturing experience preferred"
+  ],
+  "img": "https://linktoimage.com/assembly_line_worker.jpg",
+  "requiredApplicants": 6,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb97"
+  },
+  "title": "Manufacturing Engineer",
+  "company": "InduPro Solutions",
+  "sector": "Manufacturing",
+  "location": "Detroit, USA",
+  "salary": "$75,000 - $95,000 per year",
+  "description": "Design and improve manufacturing systems, ensuring production efficiency and cost-effectiveness.",
+  "requirements": [
+    "Bachelor's degree in industrial engineering",
+    "Experience with CAD and process design",
+    "Strong problem-solving skills"
+  ],
+  "img": "https://linktoimage.com/manufacturing_engineer.jpg",
+  "requiredApplicants": 4,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb96"
+  },
+  "title": "Production Manager",
+  "company": "ManuTech",
+  "sector": "Manufacturing",
+  "location": "Chicago, USA",
+  "salary": "$90,000 - $110,000 per year",
+  "description": "Oversee the production process, manage staff, and ensure product quality and efficiency.",
+  "requirements": [
+    "Bachelor's degree in manufacturing or industrial engineering",
+    "5+ years of experience in production management",
+    "Knowledge of manufacturing processes and systems"
+  ],
+  "img": "https://linktoimage.com/production_manager.jpg",
+  "requiredApplicants": 3,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb8e"
+  },
+  "title": "Mining Technician",
+  "company": "TechMine",
+  "sector": "Mining",
+  "location": "Sydney, Australia",
+  "salary": "$60,000 - $80,000 per year",
+  "description": "Provide technical support and troubleshooting for mining equipment and systems.",
+  "requirements": [
+    "Diploma in mining technology",
+    "Technical problem-solving skills",
+    "3+ years of experience"
+  ],
+  "img": "https://linktoimage.com/mining_technician.jpg",
+  "requiredApplicants": 4,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb8d"
+  },
+  "title": "Geologist",
+  "company": "GeoExplorers",
+  "sector": "Mining",
+  "location": "Alberta, Canada",
+  "salary": "$70,000 - $90,000 per year",
+  "description": "Conduct research to locate mineral deposits and assess the quality of geological resources.",
+  "requirements": [
+    "Bachelor's degree in geology",
+    "Experience with geological mapping",
+    "Willingness to travel to remote sites"
+  ],
+  "img": "https://linktoimage.com/geologist.jpg",
+  "requiredApplicants": 3,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb92"
+  },
+  "title": "Tour Guide",
+  "company": "World Wonders Tours",
+  "sector": "Tourism",
+  "location": "Paris, France",
+  "salary": "$40,000 - $50,000 per year",
+  "description": "Lead guided tours, providing valuable information to tourists about cultural and historical sites.",
+  "requirements": [
+    "Fluency in multiple languages",
+    "Knowledge of historical sites",
+    "Experience in guiding tours"
+  ],
+  "img": "https://linktoimage.com/tour_guide.jpg",
+  "requiredApplicants": 5,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb94"
+  },
+  "title": "Event Coordinator",
+  "company": "EventMasters",
+  "sector": "Tourism",
+  "location": "Los Angeles, USA",
+  "salary": "$50,000 - $70,000 per year",
+  "description": "Organize and coordinate various events for tourists, ensuring smooth operations.",
+  "requirements": [
+    "Bachelor's degree in event management",
+    "Excellent organizational skills",
+    "Experience in event planning"
+  ],
+  "img": "https://linktoimage.com/event_coordinator.jpg",
+  "requiredApplicants": 3,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+},
+{
+  "_id": {
+    "$oid": "67afae3341b453135c68fb9a"
+  },
+  "title": "Supply Chain Manager",
+  "company": "SupplyPro Logistics",
+  "sector": "Manufacturing",
+  "location": "New York, USA",
+  "salary": "$80,000 - $100,000 per year",
+  "description": "Oversee supply chain operations, manage inventory, and ensure timely delivery of materials.",
+  "requirements": [
+    "Bachelor's degree in supply chain management",
+    "Experience with logistics software",
+    "Strong communication skills"
+  ],
+  "img": "https://linktoimage.com/supply_chain_manager.jpg",
+  "requiredApplicants": 3,
+  "applications": [],
+  "status": "Open",
+  "deadline": "2025-03-01T23:59:59Z",
+  "createdAt": "2025-02-10T10:00:00Z",
+  "updatedAt": "2025-02-10T10:00:00Z"
+}]

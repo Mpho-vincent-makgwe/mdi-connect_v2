@@ -24,15 +24,11 @@ export async function POST(request) {
         { status: 401 }
       );
     }
-    
+    const isMatch6 = await bcrypt.compare(password, user.password);
+    console.log("is match? :", isMatch6);
     // Direct password comparison if method still not available
-    console.log(`Password from MongoDB${user.password}`)
-    console.log(`Password entered${password}`)
     const isMatch = (password === user.password);
-    const isMatch6 = await bcrypt.compareSync(password, user.password);
-    console.log("is match? :", isMatch);
-    console.log("is match6? :", isMatch6);
-    if (!isMatch) {
+    if (!isMatch6) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401 }

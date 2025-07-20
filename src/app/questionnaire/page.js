@@ -23,37 +23,16 @@ export default function Questionnaire() {
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(20);
   const [formData, setFormData] = useState({
-    sector: user?.sector || '',
-    experience: user?.experience || '',
-    yearsOfExperience: user?.yearsOfExperience || '',
-    qualifications: user?.qualifications || '',
-    educationLevel: user?.educationLevel || '',
-    currentlyStudying: user?.currentlyStudying || '',
+    sector: '',
+    experience: '',
+    yearsOfExperience: '',
+    qualifications: '',
+    educationLevel: '',
+    currentlyStudying: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auto-save when form data changes
-  useEffect(() => {
-    const autoSave = async () => {
-      try {
-        await updateUser({
-          ...formData,
-          completedQuestionnaire: false // Keep as false until explicitly completed
-        });
-      } catch (error) {
-        console.error('Auto-save failed:', error);
-      }
-    };
-
-    const timer = setTimeout(() => {
-      if (Object.values(formData).some(val => val !== '')) {
-        autoSave();
-      }
-    }, 2000); // Debounce for 2 seconds
-
-    return () => clearTimeout(timer);
-  }, [formData, updateUser]);
-
-  // Load saved data on mount
+  // Load user data on mount
   useEffect(() => {
     if (user) {
       setFormData({
@@ -64,7 +43,7 @@ export default function Questionnaire() {
         educationLevel: user.educationLevel || '',
         currentlyStudying: user.currentlyStudying || '',
       });
-      
+
       // Calculate current step based on filled fields
       const filledSteps = [
         !!user.sector,
@@ -91,9 +70,31 @@ export default function Questionnaire() {
   };
 
   const nextStep = () => {
-    const newProgress = Math.min(progress + 20, 100);
-    setProgress(newProgress);
-    setStep(step + 1);
+    // Basic validation for current step
+    let isValid = true;
+    
+    if (step === 1 && !formData.sector) {
+      isValid = false;
+      alert('Please select a sector');
+    } else if (step === 2 && !formData.experience) {
+      isValid = false;
+      alert('Please select your experience');
+    } else if (step === 3 && !formData.qualifications) {
+      isValid = false;
+      alert('Please select your qualifications');
+    } else if (step === 4 && !formData.educationLevel) {
+      isValid = false;
+      alert('Please select your education level');
+    } else if (step === 5 && !formData.currentlyStudying) {
+      isValid = false;
+      alert('Please select your current study status');
+    }
+
+    if (isValid) {
+      const newProgress = Math.min(progress + 20, 100);
+      setProgress(newProgress);
+      setStep(step + 1);
+    }
   };
 
   const prevStep = () => {
@@ -102,36 +103,41 @@ export default function Questionnaire() {
     setStep(step - 1);
   };
 
-const handleSubmit = async () => {
-  try {
-    const userType = formData.qualifications === 'yes' ? 'skilled' : 'unskilled';
-    
-    await updateUser({
-      ...formData,
-      role: userType,
-      completedQuestionnaire: true
-    });
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const userType = formData.qualifications === 'yes' ? 'skilled' : 'unskilled';
+      
+      await updateUser({
+        ...formData,
+        role: userType,
+        completedQuestionnaire: true
+      });
 
-    // Redirect based on user type
-    if (userType === 'skilled') {
-      router.push('/upload-qualifications');
-    } else {
-      router.push('/jobs');
+      // Redirect based on user type
+      if (userType === 'skilled') {
+        router.push('/upload-qualifications');
+      } else {
+        router.push('/jobs');
+      }
+    } catch (error) {
+      console.error('Error submitting questionnaire:', error);
+      alert('Failed to submit questionnaire. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error('Error submitting questionnaire:', error);
-  }
-};
+  };
 
-const handleSaveForLater = async () => {
+  const handleSaveForLater = async () => {
     try {
       await updateUser({
         ...formData,
         completedQuestionnaire: false
       });
-      router.push('/');
+      router.push('/dashboard'); // Changed to dashboard instead of home
     } catch (error) {
       console.error('Error saving progress:', error);
+      alert('Failed to save progress. Please try again.');
     }
   };
 
@@ -249,7 +255,12 @@ const handleSaveForLater = async () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 space-y-6">
-        {/* ... existing header and progress ... */}
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold">Candidate Profile Setup</h1>
+          <p className="text-gray-600">Complete your profile to access job opportunities</p>
+        </div>
+        
+        <Progress value={progress} className="h-2" />
         
         <div className="space-y-6">
           {renderStep()}
@@ -263,25 +274,18 @@ const handleSaveForLater = async () => {
           ) : (
             <div></div>
           )}
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={handleSaveForLater}
-            >
-              Save for Later
+            <Button onClick={nextStep}>
+              Next
             </Button>
-            
-            {step < 5 ? (
-              <Button onClick={nextStep}>
-                Next
-              </Button>
-            ) : (
-              <Button onClick={handleSubmit}>
-                Complete Profile
-              </Button>
-            )}
-          </div>
+          {step < 5 ? (
+            <Button onClick={handleSaveForLater}>
+              Save for later
+          </Button>
+          ) : (
+            <Button onClick={handleSubmit}>
+              Complete Profile
+            </Button>
+          )}
         </div>
       </div>
     </div>

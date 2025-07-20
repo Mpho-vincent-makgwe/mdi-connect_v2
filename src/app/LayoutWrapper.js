@@ -8,30 +8,64 @@ import { JobsProvider } from "@/context/JobsContext";
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import { Toaster } from '@/components/ui/toaster';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-// This component handles the actual layout and protection
+// List of routes that don't require authentication
+const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password'];
+// Routes that should be accessible after questionnaire completion
+const POST_QUESTIONNAIRE_ROUTES = ['/jobs', '/upload-qualifications', '/dashboard'];
+
 function ProtectedLayout({ children }) {
   const { user, loading } = useUser();
   const pathname = usePathname();
   const router = useRouter();
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
 
+  // Determine if we should hide the layout (for auth/questionnaire pages)
   const hideLayout = pathname?.startsWith('/auth') || pathname?.startsWith('/questionnaire');
 
   useEffect(() => {
-    // Skip auth pages and allow questionnaire even if not logged in (if needed)
-    if (loading || pathname?.startsWith('/auth')) return;
+    if (loading || !pathname) return;
 
+    // Skip public routes
+    if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
+      setInitialCheckComplete(true);
+      return;
+    }
+
+    // User not authenticated
     if (!user) {
       router.push('/auth/login');
-    } else if (!user.completedQuestionnaire && !pathname?.startsWith('/questionnaire')) {
-      router.push('/questionnaire');
+      return;
     }
+
+    // User needs to complete questionnaire
+    if (!user.completedQuestionnaire && !pathname.startsWith('/questionnaire')) {
+      router.push('/questionnaire');
+      return;
+    }
+
+    // User completed questionnaire but trying to access questionnaire again
+    if (user.completedQuestionnaire && pathname.startsWith('/questionnaire')) {
+      // Redirect based on user type
+      const redirectPath = user.role === 'skilled' ? '/upload-qualifications' : '/jobs';
+      router.push(redirectPath);
+      return;
+    }
+
+    setInitialCheckComplete(true);
   }, [user, loading, router, pathname]);
 
   // Show loading state while checking auth
-  if (loading && !pathname?.startsWith('/auth')) {
-    return <div>Loading...</div>;
+  if ((loading || !initialCheckComplete) && !PUBLIC_ROUTES.some(route => pathname?.startsWith(route))) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading application...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -48,7 +82,6 @@ function ProtectedLayout({ children }) {
   );
 }
 
-// This wrapper provides all contexts
 export default function LayoutWrapper({ children }) {
   return (
     <UserProvider>

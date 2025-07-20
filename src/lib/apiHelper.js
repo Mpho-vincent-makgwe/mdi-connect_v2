@@ -50,13 +50,13 @@ const apiHelper = {
   },
 
   updateProfile: async (updates) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('PUT', '/profile', updates, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
-  }
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return apiHelper.request('PUT', '/profile', updates, {
+    headers: { 
+      Authorization: `Bearer ${token}` 
+    }
+  });
+}
 };
 
 export default apiHelper;

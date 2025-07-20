@@ -11,6 +11,7 @@ export function UserProvider({ children }) {
   const router = useRouter();
 
   // context/UserContext.js
+// context/UserContext.js
 useEffect(() => {
   const fetchUser = async () => {
     try {
@@ -26,8 +27,11 @@ useEffect(() => {
       
       if (response.success) {
         setUser(response.user);
-        // Only redirect if not already on questionnaire page
-        if (!response.user.completedQuestionnaire && !window.location.pathname.includes('/questionnaire')) {
+        // Only redirect if not already on questionnaire page and not completed
+        const currentPath = window.location.pathname;
+        if (!response.user.completedQuestionnaire && 
+            !currentPath.includes('/questionnaire') &&
+            !currentPath.includes('/auth')) {
           router.push('/questionnaire');
         }
       } else {
