@@ -27,7 +27,7 @@ const apiHelper = {
     }
   },
 
-  // Auth methods (unchanged)
+  // Auth methods
   login: async (email, password) => {
     return apiHelper.request('POST', '/auth/login', { email, password });
   },
@@ -41,25 +41,24 @@ const apiHelper = {
     });
   },
 
-getProfile: async () => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  return apiHelper.request('GET', '/me', {}, {
-    headers: { 
-      Authorization: `Bearer ${token}` 
-    }
-  });
-},
+  getProfile: async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('GET', '/me', {}, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
 
-updateProfile: async (updates) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  return apiHelper.request('PUT', '/me', updates, {
-    headers: { 
-      Authorization: `Bearer ${token}` 
-    }
-  });
-},
+  updateProfile: async (updates) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('PUT', '/me', updates, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
 
-  // New methods for applications
   getApplications: async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     return apiHelper.request('GET', '/applications', {}, {
@@ -69,7 +68,6 @@ updateProfile: async (updates) => {
     });
   },
 
-  // New methods for interviews
   getInterviews: async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     return apiHelper.request('GET', '/interviews', {}, {
@@ -79,7 +77,6 @@ updateProfile: async (updates) => {
     });
   },
 
-  // New methods for notifications
   getNotifications: async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     return apiHelper.request('GET', '/notifications', {}, {
@@ -104,14 +101,24 @@ updateProfile: async (updates) => {
     if (filters.sector && filters.sector !== 'all') query.append('sector', filters.sector);
     if (filters.location && filters.location !== 'all') query.append('location', filters.location);
 
-    return apiHelper.request('GET', `/jobs?${query.toString()}`);
+    const response = await apiHelper.request('GET', `/jobs?${query.toString()}`);
+    return {
+      ...response,
+      jobs: response.data || []
+    };
   },
 
-  applyForJob: async (jobId, applicationData) => {
+  applyForJob: async (jobId, formData) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('POST', '/jobs', { jobId, ...applicationData }, {
+    
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    return apiHelper.request('POST', '/jobs', formData, {
       headers: { 
-        Authorization: `Bearer ${token}` 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
       }
     });
   },
@@ -119,7 +126,6 @@ updateProfile: async (updates) => {
   getJobDetails: async (jobId) => {
     return apiHelper.request('GET', `/jobs/${jobId}`);
   },
-
 };
 
 export default apiHelper;

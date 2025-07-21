@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useJobs } from '@/context/JobsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,17 +14,18 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { toast } from 'react-hot-toast';
 
 export default function JobApplicationModal({ job, open, onOpenChange }) {
-  const { applyForJob, session } = useJobs(); // Get session from context
+  const { applyForJob } = useJobs();
   const [application, setApplication] = useState({
-    name: session?.user?.name || '',
-    email: session?.user?.email || '',
+    name: '',
+    email: '',
     phone: '',
     linkedin: '',
     coverLetter: '',
-    resumeUrl: '',
   });
+  const [resumeFile, setResumeFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -33,31 +34,76 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
     setApplication(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    setResumeFile(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
-      await applyForJob(job._id, application);
-      onOpenChange(false);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Please log in to apply for jobs');
+      }
+
+      const formData = new FormData();
+      formData.append('jobId', job._id || job.id);
+      formData.append('name', application.name);
+      formData.append('email', application.email);
+      formData.append('phone', application.phone);
+      formData.append('linkedin', application.linkedin || '');
+      formData.append('coverLetter', application.coverLetter);
+      
+      if (resumeFile) {
+        formData.append('resume', resumeFile);
+      } else {
+        throw new Error('Please upload your resume');
+      }
+
+      const result = await applyForJob(job._id || job.id, formData);
+      
+      if (result.success) {
+        toast.success('Application submitted successfully!');
+        onOpenChange(false);
+      } else {
+        setError(result.message || 'Failed to submit application');
+      }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
+      console.error('Application error:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (open) {
+      // Reset form when modal opens
+      setApplication({
+        name: '',
+        email: '',
+        phone: '',
+        linkedin: '',
+        coverLetter: '',
+      });
+      setResumeFile(null);
+      setError('');
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Apply for {job.title}</DialogTitle>
           <DialogDescription>
             Complete the form to apply for this position at {job.company}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
@@ -118,22 +164,13 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="resume">Resume</Label>
+            <Label htmlFor="resume">Resume (PDF or DOCX)</Label>
             <Input
               id="resume"
-              name="resumeUrl"
+              name="resume"
               type="file"
-              onChange={(e) => {
-                // In a real app, you would upload the file to storage
-                // and set the URL in the application state
-                const file = e.target.files[0];
-                if (file) {
-                  setApplication(prev => ({
-                    ...prev,
-                    resumeUrl: file.name // This would be the URL in a real app
-                  }));
-                }
-              }}
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileChange}
               required
             />
           </div>

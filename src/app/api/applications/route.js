@@ -8,27 +8,27 @@ export async function GET(request) {
   
   try {
     const token = request.headers.get('authorization')?.split(' ')[1];
-    
     if (!token) {
       return NextResponse.json(
-        { success: false, message: 'Authorization token required' },
+        { success: false, message: 'Authorization required' },
         { status: 401 }
       );
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const applications = await Application.find({ user: decoded.id })
-      .populate('job', 'title company')
-      .sort({ appliedDate: -1 });
+    const userId = decoded.id;
 
-    // console.log("Backend applications:", applications);
-    
-    return NextResponse.json({ 
-      success: true, 
+    // Find all applications for this user
+    const applications = await Application.find({ user: userId })
+      .populate('job', 'title company') // Optional: populate job details
+      .lean();
+
+    return NextResponse.json({
+      success: true,
       data: applications.map(app => ({
-        id: app._id,
-        jobTitle: app.job?.title,
-        company: app.job?.company,
+        _id: app._id,
+        user: app.user,
+        job: app.job?._id || app.job, // Ensure consistent job ID format
         status: app.status,
         appliedDate: app.appliedDate,
         resume: app.resume,
@@ -36,9 +36,8 @@ export async function GET(request) {
       }))
     });
   } catch (error) {
-    console.error("Error fetching applications:", error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch applications', error: error.message },
+      { success: false, message: 'Failed to fetch applications' },
       { status: 500 }
     );
   }

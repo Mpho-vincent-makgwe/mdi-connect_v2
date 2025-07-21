@@ -165,11 +165,11 @@ const ApplicationsPage = () => {
               key={app.id}
               title={app.jobTitle}
               subtitle={
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                <span className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
                   <span>{app.company}</span>
                   <span className="hidden sm:block">•</span>
                   <span>Applied on {formatDate(app.appliedDate)}</span>
-                </div>
+                </span>
               }
               rightContent={getStatusBadge(app.status)}
               href={`/applications/${app.id}`}

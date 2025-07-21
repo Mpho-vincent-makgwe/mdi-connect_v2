@@ -1,22 +1,22 @@
-// src/app/jobs/page.js
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useJobs } from '@/context/JobsContext';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import JobCard from '@/components/JobCard';
-import { FiSearch, FiFilter, FiX } from 'react-icons/fi';
+import JobFilters from '@/components/JobFilters';
 
 export default function JobBoard() {
-  const { jobs, loading, error, fetchJobs } = useJobs();
+  const { 
+    jobs, 
+    appliedJobs, 
+    loading, 
+    error, 
+    fetchJobs,
+    hasAppliedToJob 
+  } = useJobs();
+  
   const [filters, setFilters] = useState({
     search: '',
     sector: 'all',
@@ -68,74 +68,51 @@ export default function JobBoard() {
             variant="ghost" 
             size="sm" 
             onClick={clearFilters}
-            className="flex items-center gap-1"
           >
-            <FiX className="h-4 w-4" />
-            Clear filters
+            Clear all filters
           </Button>
         )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
-          <div className="space-y-2">
-            <h3 className="font-medium">Search</h3>
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search jobs..."
-                className="pl-10"
-                value={filters.search}
-                onChange={handleSearchChange}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="font-medium">Sector</h3>
-            <Select 
-              value={filters.sector}
-              onValueChange={handleSectorChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All Sectors" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sectors</SelectItem>
-                <SelectItem value="Mining">Mining</SelectItem>
-                <SelectItem value="Tourism">Tourism</SelectItem>
-                <SelectItem value="Manufacturing">Manufacturing</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="font-medium">Location</h3>
-            <Select 
-              value={filters.location}
-              onValueChange={handleLocationChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All Locations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="Johannesburg">Johannesburg</SelectItem>
-                <SelectItem value="Cape Town">Cape Town</SelectItem>
-                <SelectItem value="Durban">Durban</SelectItem>
-                <SelectItem value="Pretoria">Pretoria</SelectItem>
-                <SelectItem value="Port Elizabeth">Port Elizabeth</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <JobFilters
+          searchValue={filters.search}
+          sectorValue={filters.sector}
+          locationValue={filters.location}
+          onSearchChange={handleSearchChange}
+          onSectorChange={handleSectorChange}
+          onLocationChange={handleLocationChange}
+          onClear={clearFilters}
+          loading={loading}
+          hasFilters={hasFilters}
+        />
         
         {/* Job Listings */}
         <div className="md:col-span-2 space-y-4">
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <p>Loading jobs...</p>
+            <div className="grid grid-cols-1 gap-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <div className="space-y-2">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                      <Skeleton className="h-12 w-12 rounded" />
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </div>
+                    <div className="flex justify-between pt-2">
+                      <Skeleton className="h-9 w-24" />
+                      <Skeleton className="h-5 w-20" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : error ? (
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
@@ -148,10 +125,20 @@ export default function JobBoard() {
                 Retry
               </Button>
             </div>
-          ) : jobs && jobs.length > 0 ? (
-            jobs.map(job => (
-              <JobCard key={job._id} job={job} />
-            ))
+          ) : jobs?.length > 0 ? (
+            jobs.map(job => {
+              if (!job?._id && !job?.id) {
+                console.error('Invalid job data:', job);
+                return null;
+              }
+              return (
+                <JobCard 
+                  key={job._id || job.id} 
+                  job={job}
+                  hasApplied={hasAppliedToJob(job._id || job.id)}
+                />
+              );
+            })
           ) : (
             <div className="bg-white p-6 rounded-lg shadow-sm text-center">
               <p className="text-gray-600">No jobs found</p>

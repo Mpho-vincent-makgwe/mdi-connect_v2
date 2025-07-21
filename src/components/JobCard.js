@@ -1,18 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import JobApplicationModal from './JobApplicationModal';
+import { useRouter } from 'next/navigation';
+import { useJobs } from '@/context/JobsContext';
 
 export default function JobCard({ job }) {
-  const [applicationOpen, setApplicationOpen] = useState(false);
+  const router = useRouter();
+  const { hasAppliedToJob } = useJobs();
+  
+  // Check if the current user has applied to this job
+  const hasApplied = hasAppliedToJob(job._id || job.id);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div className="p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4">
+    <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+      <div className="p-4 space-y-4">
+        <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-semibold">{job.title}</h3>
+            <h3 className="font-bold text-lg">{job.title}</h3>
             <p className="text-gray-600">{job.company}</p>
           </div>
           <img 
@@ -23,44 +27,26 @@ export default function JobCard({ job }) {
         </div>
         
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-600">{job.location}</span>
-            <span className="text-gray-400">•</span>
-            <span className="text-gray-600">{job.sector}</span>
-            <span className="text-gray-400">•</span>
-            <span className="text-gray-600">{job.salary}</span>
-          </div>
-          
-          <p className="text-gray-700 line-clamp-3">{job.description}</p>
-          
-          <div className="pt-2">
-            <h4 className="font-medium text-sm">Requirements:</h4>
-            <ul className="list-disc list-inside text-sm text-gray-600">
-              {job.requirements.map((req, i) => (
-                <li key={i}>{req}</li>
-              ))}
-            </ul>
-          </div>
+          <p className="text-sm text-gray-500">{job.location}</p>
+          <p className="text-sm text-gray-500">{job.sector}</p>
+          <p className="text-sm font-medium">{job.salary}</p>
         </div>
         
         <div className="flex justify-between items-center pt-2">
-          <p className="text-sm text-gray-500">
-            Closes: {new Date(job.deadline).toLocaleDateString()}
-          </p>
           <Button 
-            size="sm" 
-            onClick={() => setApplicationOpen(true)}
+            variant="outline" 
+            onClick={() => router.push(`/jobs/${job._id || job.id}`)}
           >
-            Apply Now
+            View Details
           </Button>
+          
+          {hasApplied && (
+            <span className="text-sm text-green-600 font-medium">
+              Applied ✓
+            </span>
+          )}
         </div>
       </div>
-      
-      <JobApplicationModal 
-        job={job}
-        open={applicationOpen}
-        onOpenChange={setApplicationOpen}
-      />
     </div>
   );
 }

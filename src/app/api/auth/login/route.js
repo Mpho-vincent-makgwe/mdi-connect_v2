@@ -26,8 +26,6 @@ export async function POST(request) {
     }
     const isMatch6 = await bcrypt.compare(password, user.password);
     console.log("is match? :", isMatch6);
-    // Direct password comparison if method still not available
-    const isMatch = (password === user.password);
     if (!isMatch6) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
