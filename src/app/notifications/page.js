@@ -1,3 +1,4 @@
+// NotificationsPage.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
@@ -59,17 +60,14 @@ const NotificationsPage = () => {
       setIsMarkingAll(true);
       const unreadNotifications = notifications.filter(n => !n.read);
       
-      // Optimistically update UI
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       
-      // Mark all as read in parallel
       await Promise.all(
         unreadNotifications.map(n => apiHelper.markNotificationAsRead(n.id))
       );
       
       toast.success('All notifications marked as read');
     } catch (err) {
-      // Revert optimistic update if error occurs
       setNotifications(notifications);
       toast.error(err.message || 'Failed to mark all notifications as read');
     } finally {
@@ -87,7 +85,11 @@ const NotificationsPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div style={{
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '1rem'
+    }}>
       <SectionHeader 
         title="Notifications" 
         actionText={isMarkingAll ? 'Processing...' : 'Mark all as read'} 
@@ -97,20 +99,42 @@ const NotificationsPage = () => {
       
       {loading ? (
         <Card>
-          <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '1rem 0'
+          }}>
+            <div style={{
+              animation: 'spin 1s linear infinite',
+              borderRadius: '9999px',
+              height: '2rem',
+              width: '2rem',
+              border: '2px solid #132857',
+              borderTopColor: 'transparent'
+            }}></div>
           </div>
         </Card>
       ) : error ? (
         <Card>
-          <p className="text-red-500 text-center py-4">{error}</p>
+          <p style={{
+            color: '#8B0000',
+            textAlign: 'center',
+            padding: '1rem 0'
+          }}>{error}</p>
         </Card>
       ) : notifications.length === 0 ? (
         <Card>
-          <p className="text-gray-500 text-center py-4">You don't have any notifications yet.</p>
+          <p style={{
+            color: 'rgba(140, 60, 30, 0.7)',
+            textAlign: 'center',
+            padding: '1rem 0'
+          }}>You don't have any notifications yet.</p>
         </Card>
       ) : (
-        <Card className="divide-y divide-gray-100">
+        <Card style={{
+          borderTop: '1px solid rgba(140, 60, 30, 0.1)',
+          borderBottom: '1px solid rgba(140, 60, 30, 0.1)'
+        }}>
           {notifications.map((notification) => (
             <ListItem
               key={notification.id}
@@ -118,11 +142,24 @@ const NotificationsPage = () => {
               subtitle={`${notification.message} • ${formatDate(notification.createdAt)}`}
               rightContent={
                 !notification.read && (
-                  <span className="w-2 h-2 rounded-full bg-primary-600"></span>
+                  <span style={{
+                    width: '0.5rem',
+                    height: '0.5rem',
+                    borderRadius: '9999px',
+                    backgroundColor: '#132857'
+                  }}></span>
                 )
               }
               onClick={() => !notification.read && markAsRead(notification.id)}
-              className={`${notification.read ? 'opacity-75' : 'font-medium'} hover:bg-gray-50`}
+              style={{
+                fontWeight: notification.read ? 'normal' : '500',
+                opacity: notification.read ? 0.75 : 1,
+                backgroundColor: 'transparent',
+                transition: 'background-color 0.2s',
+                ':hover': {
+                  backgroundColor: 'rgba(242, 236, 228, 0.5)'
+                }
+              }}
             />
           ))}
         </Card>

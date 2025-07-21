@@ -1,4 +1,4 @@
-// app/questionnaire/page.js
+// Questionnaire.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -32,7 +32,6 @@ export default function Questionnaire() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load user data on mount
   useEffect(() => {
     if (user) {
       setFormData({
@@ -44,7 +43,6 @@ export default function Questionnaire() {
         currentlyStudying: user.currentlyStudying || '',
       });
 
-      // Calculate current step based on filled fields
       const filledSteps = [
         !!user.sector,
         !!user.experience,
@@ -70,7 +68,6 @@ export default function Questionnaire() {
   };
 
   const nextStep = () => {
-    // Basic validation for current step
     let isValid = true;
     
     if (step === 1 && !formData.sector) {
@@ -114,7 +111,6 @@ export default function Questionnaire() {
         completedQuestionnaire: true
       });
 
-      // Redirect based on user type
       if (userType === 'skilled') {
         router.push('/upload-qualifications');
       } else {
@@ -134,20 +130,19 @@ export default function Questionnaire() {
         ...formData,
         completedQuestionnaire: false
       });
-      router.push('/dashboard'); // Changed to dashboard instead of home
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error saving progress:', error);
       alert('Failed to save progress. Please try again.');
     }
   };
 
-
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Which sector are you interested in?</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Which sector are you interested in?</h3>
             <Select onValueChange={(value) => handleSelectChange('sector', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a sector" />
@@ -162,23 +157,23 @@ export default function Questionnaire() {
         );
       case 2:
         return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Do you have any professional experience?</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Do you have any professional experience?</h3>
             <RadioGroup 
               onValueChange={(value) => handleSelectChange('experience', value)}
-              className="space-y-3"
+              style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
             >
-              <div className="flex items-center space-x-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <RadioGroupItem value="yes" id="experience-yes" />
                 <Label htmlFor="experience-yes">Yes</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <RadioGroupItem value="no" id="experience-no" />
                 <Label htmlFor="experience-no">No</Label>
               </div>
             </RadioGroup>
             {formData.experience === 'yes' && (
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <Label>Years of experience</Label>
                 <Input 
                   type="number" 
@@ -192,17 +187,17 @@ export default function Questionnaire() {
         );
       case 3:
         return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Do you have any formal qualifications?</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Do you have any formal qualifications?</h3>
             <RadioGroup 
               onValueChange={(value) => handleSelectChange('qualifications', value)}
-              className="space-y-3"
+              style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
             >
-              <div className="flex items-center space-x-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <RadioGroupItem value="yes" id="qualifications-yes" />
                 <Label htmlFor="qualifications-yes">Yes</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <RadioGroupItem value="no" id="qualifications-no" />
                 <Label htmlFor="qualifications-no">No</Label>
               </div>
@@ -211,8 +206,8 @@ export default function Questionnaire() {
         );
       case 4:
         return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">What is your highest education level?</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>What is your highest education level?</h3>
             <Select onValueChange={(value) => handleSelectChange('educationLevel', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select education level" />
@@ -230,17 +225,17 @@ export default function Questionnaire() {
         );
       case 5:
         return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Are you currently enrolled in any educational program?</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Are you currently enrolled in any educational program?</h3>
             <RadioGroup 
               onValueChange={(value) => handleSelectChange('currentlyStudying', value)}
-              className="space-y-3"
+              style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
             >
-              <div className="flex items-center space-x-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <RadioGroupItem value="yes" id="studying-yes" />
                 <Label htmlFor="studying-yes">Yes</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <RadioGroupItem value="no" id="studying-no" />
                 <Label htmlFor="studying-no">No</Label>
               </div>
@@ -253,36 +248,79 @@ export default function Questionnaire() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">Candidate Profile Setup</h1>
-          <p className="text-gray-600">Complete your profile to access job opportunities</p>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'rgba(242, 236, 228, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '1rem'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '28rem',
+        backgroundColor: '#F2ECE4',
+        borderRadius: '0.5rem',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        padding: '1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.5rem'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1A1A1A' }}>Candidate Profile Setup</h1>
+          <p style={{ color: 'rgba(140, 60, 30, 0.7)' }}>Complete your profile to access job opportunities</p>
         </div>
         
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} style={{ height: '0.5rem' }} />
         
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {renderStep()}
         </div>
         
-        <div className="flex justify-between">
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {step > 1 ? (
-            <Button variant="outline" onClick={prevStep}>
+            <Button 
+              variant="outline" 
+              onClick={prevStep}
+              style={{
+                borderColor: '#8C3C1E',
+                color: '#8C3C1E',
+                backgroundColor: 'transparent'
+              }}
+            >
               Back
             </Button>
           ) : (
             <div></div>
           )}
-            <Button onClick={nextStep}>
+            <Button 
+              onClick={nextStep}
+              style={{
+                backgroundColor: '#132857',
+                color: '#F2ECE4'
+              }}
+            >
               Next
             </Button>
           {step < 5 ? (
-            <Button onClick={handleSaveForLater}>
+            <Button 
+              onClick={handleSaveForLater}
+              style={{
+                backgroundColor: '#132857',
+                color: '#F2ECE4'
+              }}
+            >
               Save for later
-          </Button>
+            </Button>
           ) : (
-            <Button onClick={handleSubmit}>
+            <Button 
+              onClick={handleSubmit}
+              style={{
+                backgroundColor: '#132857',
+                color: '#F2ECE4'
+              }}
+            >
               Complete Profile
             </Button>
           )}

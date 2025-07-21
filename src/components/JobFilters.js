@@ -1,4 +1,4 @@
-// components/JobFilters.js
+// JobFilters.js
 'use client';
 
 import { Input } from '@/components/ui/input';
@@ -33,27 +33,47 @@ export default function JobFilters({
   ];
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="font-medium text-lg">Filters</h2>
+    <div style={{
+      backgroundColor: '#F2ECE4',
+      padding: '1rem',
+      borderRadius: '0.5rem',
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1rem'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h2 style={{
+          fontWeight: '500',
+          fontSize: '1.125rem',
+          color: '#1A1A1A'
+        }}>Filters</h2>
         {hasFilters && (
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={onClear}
-            className="flex items-center gap-1"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
           >
-            <FiX className="h-4 w-4" />
+            <FiX style={{ height: '1rem', width: '1rem' }} />
             Clear
           </Button>
         )}
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <h3 className="font-medium">Search</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <h3 style={{ fontWeight: '500', color: '#1A1A1A' }}>Search</h3>
           {loading ? (
-            <Skeleton className="h-10 w-full" />
+            <Skeleton style={{ height: '2.5rem', width: '100%' }} />
           ) : (
             <Input
               placeholder="Search jobs..."
@@ -63,10 +83,10 @@ export default function JobFilters({
           )}
         </div>
         
-        <div className="space-y-2">
-          <h3 className="font-medium">Sector</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <h3 style={{ fontWeight: '500', color: '#1A1A1A' }}>Sector</h3>
           {loading ? (
-            <Skeleton className="h-10 w-full" />
+            <Skeleton style={{ height: '2.5rem', width: '100%' }} />
           ) : (
             <Select value={sectorValue} onValueChange={onSectorChange}>
               <SelectTrigger>
@@ -84,10 +104,10 @@ export default function JobFilters({
           )}
         </div>
         
-        <div className="space-y-2">
-          <h3 className="font-medium">Location</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <h3 style={{ fontWeight: '500', color: '#1A1A1A' }}>Location</h3>
           {loading ? (
-            <Skeleton className="h-10 w-full" />
+            <Skeleton style={{ height: '2.5rem', width: '100%' }} />
           ) : (
             <Select value={locationValue} onValueChange={onLocationChange}>
               <SelectTrigger>

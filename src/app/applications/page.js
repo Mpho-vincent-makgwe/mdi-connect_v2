@@ -1,3 +1,4 @@
+// ApplicationsPage.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
@@ -48,40 +49,54 @@ const ApplicationsPage = () => {
   const getStatusBadge = (status) => {
     const statusConfig = {
       applied: {
-        className: 'bg-blue-100 text-blue-800',
-        icon: <FiClock className="mr-1" />,
+        backgroundColor: 'rgba(70, 130, 180, 0.1)',
+        color: '#4682B4',
+        icon: <FiClock style={{ marginRight: '0.25rem' }} />,
         text: 'Applied'
       },
       reviewed: {
-        className: 'bg-purple-100 text-purple-800',
-        icon: <FiBriefcase className="mr-1" />,
+        backgroundColor: 'rgba(128, 0, 128, 0.1)',
+        color: '#800080',
+        icon: <FiBriefcase style={{ marginRight: '0.25rem' }} />,
         text: 'Under Review'
       },
       interview: {
-        className: 'bg-yellow-100 text-yellow-800',
-        icon: <FiAlertCircle className="mr-1" />,
+        backgroundColor: 'rgba(255, 165, 0, 0.1)',
+        color: '#FFA500',
+        icon: <FiAlertCircle style={{ marginRight: '0.25rem' }} />,
         text: 'Interview'
       },
       offered: {
-        className: 'bg-green-100 text-green-800',
-        icon: <FiCheckCircle className="mr-1" />,
+        backgroundColor: 'rgba(1, 68, 33, 0.1)',
+        color: '#014421',
+        icon: <FiCheckCircle style={{ marginRight: '0.25rem' }} />,
         text: 'Offer Received'
       },
       rejected: {
-        className: 'bg-red-100 text-red-800',
-        icon: <FiXCircle className="mr-1" />,
+        backgroundColor: 'rgba(139, 0, 0, 0.1)',
+        color: '#8B0000',
+        icon: <FiXCircle style={{ marginRight: '0.25rem' }} />,
         text: 'Not Selected'
       }
     };
 
     const config = statusConfig[status] || {
-      className: 'bg-gray-100 text-gray-800',
+      backgroundColor: 'rgba(140, 60, 30, 0.1)',
+      color: '#8C3C1E',
       icon: null,
       text: status
     };
 
     return (
-      <span className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${config.className}`}>
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        fontSize: '0.75rem',
+        padding: '0.25rem 0.5rem',
+        borderRadius: '9999px',
+        backgroundColor: config.backgroundColor,
+        color: config.color
+      }}>
         {config.icon}
         {config.text}
       </span>
@@ -98,10 +113,25 @@ const ApplicationsPage = () => {
 
   if (userLoading) {
     return (
-      <div className="container mx-auto px-4 py-6">
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '1rem'
+      }}>
         <Card>
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '2rem 0'
+          }}>
+            <div style={{
+              animation: 'spin 1s linear infinite',
+              borderRadius: '9999px',
+              height: '2rem',
+              width: '2rem',
+              border: '2px solid #132857',
+              borderTopColor: 'transparent'
+            }}></div>
           </div>
         </Card>
       </div>
@@ -109,22 +139,35 @@ const ApplicationsPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div style={{
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '1rem'
+    }}>
       <SectionHeader 
         title="Your Applications" 
         actionText={filter === 'all' ? 'Show All' : null}
         onActionClick={() => setFilter('all')}
       >
-        <div className="flex space-x-2 mt-4">
+        <div style={{
+          display: 'flex',
+          gap: '0.5rem',
+          marginTop: '1rem'
+        }}>
           {['all', 'applied', 'reviewed', 'interview', 'offered', 'rejected'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-xs rounded-full ${
-                filter === f 
-                  ? 'bg-primary-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              style={{
+                padding: '0.25rem 0.75rem',
+                fontSize: '0.75rem',
+                borderRadius: '9999px',
+                backgroundColor: filter === f ? '#132857' : 'rgba(140, 60, 30, 0.1)',
+                color: filter === f ? '#F2ECE4' : '#8C3C1E',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -134,24 +177,56 @@ const ApplicationsPage = () => {
       
       {loading ? (
         <Card>
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '2rem 0'
+          }}>
+            <div style={{
+              animation: 'spin 1s linear infinite',
+              borderRadius: '9999px',
+              height: '2rem',
+              width: '2rem',
+              border: '2px solid #132857',
+              borderTopColor: 'transparent'
+            }}></div>
           </div>
         </Card>
       ) : error ? (
         <Card>
-          <p className="text-red-500 text-center py-4">{error}</p>
+          <p style={{
+            color: '#8B0000',
+            textAlign: 'center',
+            padding: '1rem 0'
+          }}>{error}</p>
         </Card>
       ) : filteredApplications.length === 0 ? (
         <Card>
-          <div className="text-center py-8">
-            <FiBriefcase className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <div style={{
+            textAlign: 'center',
+            padding: '2rem 0'
+          }}>
+            <FiBriefcase style={{
+              margin: '0 auto',
+              height: '3rem',
+              width: '3rem',
+              color: 'rgba(140, 60, 30, 0.4)'
+            }} />
+            <h3 style={{
+              marginTop: '0.5rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#1A1A1A'
+            }}>
               {filter === 'all' 
                 ? 'You haven\'t applied to any jobs yet'
                 : `No ${filter} applications`}
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p style={{
+              marginTop: '0.25rem',
+              fontSize: '0.875rem',
+              color: 'rgba(140, 60, 30, 0.7)'
+            }}>
               {filter === 'all' 
                 ? 'Get started by applying to jobs that match your skills'
                 : 'Check back later or apply to more positions'}
@@ -159,21 +234,34 @@ const ApplicationsPage = () => {
           </div>
         </Card>
       ) : (
-        <Card className="divide-y divide-gray-100">
+        <Card style={{
+          borderTop: '1px solid rgba(140, 60, 30, 0.1)',
+          borderBottom: '1px solid rgba(140, 60, 30, 0.1)'
+        }}>
           {filteredApplications.map((app) => (
             <ListItem
               key={app.id}
               title={app.jobTitle}
               subtitle={
-                <span className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                <span style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  marginTop: '0.25rem'
+                }}>
                   <span>{app.company}</span>
-                  <span className="hidden sm:block">•</span>
                   <span>Applied on {formatDate(app.appliedDate)}</span>
                 </span>
               }
               rightContent={getStatusBadge(app.status)}
               href={`/applications/${app.id}`}
-              className="hover:bg-gray-50"
+              style={{
+                backgroundColor: 'transparent',
+                transition: 'background-color 0.2s',
+                ':hover': {
+                  backgroundColor: 'rgba(242, 236, 228, 0.5)'
+                }
+              }}
             />
           ))}
         </Card>

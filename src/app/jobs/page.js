@@ -1,3 +1,4 @@
+// JobBoard.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,7 +24,6 @@ export default function JobBoard() {
     location: 'all'
   });
 
-  // Initialize with empty filters
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
@@ -40,7 +40,6 @@ export default function JobBoard() {
     setFilters(prev => ({...prev, location: value}));
   };
 
-  // Debounce the filter changes
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchJobs(filters);
@@ -60,21 +59,44 @@ export default function JobBoard() {
   const hasFilters = filters.search || filters.sector !== 'all' || filters.location !== 'all';
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-2xl font-bold">Job Opportunities</h1>
+    <div style={{
+      padding: '1.5rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1.5rem'
+    }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        alignItems: 'flex-start'
+      }}>
+        <h1 style={{
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: '#1A1A1A'
+        }}>Job Opportunities</h1>
         {hasFilters && (
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={clearFilters}
+            style={{
+              borderColor: '#8C3C1E',
+              color: '#8C3C1E',
+              backgroundColor: 'transparent'
+            }}
           >
             Clear all filters
           </Button>
         )}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gap: '1rem'
+      }}>
         {/* Filters */}
         <JobFilters
           searchValue={filters.search}
@@ -89,37 +111,61 @@ export default function JobBoard() {
         />
         
         {/* Job Listings */}
-        <div className="md:col-span-2 space-y-4">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
           {loading ? (
-            <div className="grid grid-cols-1 gap-4">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr',
+              gap: '1rem'
+            }}>
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="bg-white p-4 rounded-lg shadow-sm">
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <div className="space-y-2">
-                        <Skeleton className="h-6 w-48" />
-                        <Skeleton className="h-4 w-32" />
+                <div key={i} style={{
+                  backgroundColor: '#F2ECE4',
+                  padding: '1rem',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <Skeleton style={{ height: '1.5rem', width: '12rem', backgroundColor: 'rgba(140, 60, 30, 0.1)' }} />
+                        <Skeleton style={{ height: '1rem', width: '8rem', backgroundColor: 'rgba(140, 60, 30, 0.1)' }} />
                       </div>
-                      <Skeleton className="h-12 w-12 rounded" />
+                      <Skeleton style={{ height: '3rem', width: '3rem', borderRadius: '0.25rem', backgroundColor: 'rgba(140, 60, 30, 0.1)' }} />
                     </div>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <Skeleton style={{ height: '1rem', width: '100%', backgroundColor: 'rgba(140, 60, 30, 0.1)' }} />
+                      <Skeleton style={{ height: '1rem', width: '75%', backgroundColor: 'rgba(140, 60, 30, 0.1)' }} />
                     </div>
-                    <div className="flex justify-between pt-2">
-                      <Skeleton className="h-9 w-24" />
-                      <Skeleton className="h-5 w-20" />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem' }}>
+                      <Skeleton style={{ height: '2.25rem', width: '6rem', backgroundColor: 'rgba(140, 60, 30, 0.1)' }} />
+                      <Skeleton style={{ height: '1.25rem', width: '5rem', backgroundColor: 'rgba(140, 60, 30, 0.1)' }} />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : error ? (
-            <div className="bg-white p-6 rounded-lg shadow-sm text-center">
-              <p className="text-red-500">Error: {error}</p>
+            <div style={{
+              backgroundColor: '#F2ECE4',
+              padding: '1.5rem',
+              borderRadius: '0.5rem',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              textAlign: 'center'
+            }}>
+              <p style={{ color: '#8B0000' }}>Error: {error}</p>
               <Button 
                 variant="ghost" 
-                className="mt-2"
+                style={{
+                  marginTop: '0.5rem',
+                  borderColor: '#8C3C1E',
+                  color: '#8C3C1E',
+                  backgroundColor: 'transparent'
+                }}
                 onClick={() => fetchJobs()}
               >
                 Retry
@@ -140,11 +186,22 @@ export default function JobBoard() {
               );
             })
           ) : (
-            <div className="bg-white p-6 rounded-lg shadow-sm text-center">
-              <p className="text-gray-600">No jobs found</p>
+            <div style={{
+              backgroundColor: '#F2ECE4',
+              padding: '1.5rem',
+              borderRadius: '0.5rem',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              textAlign: 'center'
+            }}>
+              <p style={{ color: 'rgba(140, 60, 30, 0.7)' }}>No jobs found</p>
               <Button 
                 variant="ghost" 
-                className="mt-2"
+                style={{
+                  marginTop: '0.5rem',
+                  borderColor: '#8C3C1E',
+                  color: '#8C3C1E',
+                  backgroundColor: 'transparent'
+                }}
                 onClick={() => fetchJobs()}
               >
                 Refresh

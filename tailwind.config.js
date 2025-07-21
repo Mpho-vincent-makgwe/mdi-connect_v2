@@ -1,11 +1,39 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class', // Enable class-based dark mode
   content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
+        // Primary color palette
+        navy: '#132857',
+        brown: '#8C3C1E',
+        cream: '#F2ECE4',
+        orange: '#FF8000',
+        amber: '#FFA500',
+        
+        // Extended palette
+        red: {
+          light: '#C1440E',
+          DEFAULT: '#8B0000',
+          dark: '#6B0000',
+        },
+        green: {
+          light: '#4FA89C',
+          DEFAULT: '#355E3B',
+          dark: '#014421',
+        },
+        blue: {
+          light: '#87CEEB',
+          DEFAULT: '#4682B4',
+          dark: '#1E3F72',
+        },
+        
+        // UI colors with hsl variables
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -47,5 +75,9 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    // Add other plugins as needed
+  ],
 }

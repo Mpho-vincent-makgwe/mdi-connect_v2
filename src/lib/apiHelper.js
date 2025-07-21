@@ -115,7 +115,7 @@ const apiHelper = {
       throw new Error('No authentication token found');
     }
 
-    return apiHelper.request('POST', '/jobs', formData, {
+    return apiHelper.request('POST', `/jobs/${jobId}`, formData, {
       headers: { 
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'

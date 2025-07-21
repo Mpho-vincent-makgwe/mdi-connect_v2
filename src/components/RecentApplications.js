@@ -1,84 +1,181 @@
+// components/RecentApplications.js
 'use client';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { FiExternalLink } from 'react-icons/fi';
 
-
 export default function RecentApplications() {
-const applications = [
-  {
-    id: 'APL-1024',
-    candidate: 'John Smith',
-    position: 'Mining Engineer',
-    date: '2023-11-15',
-    status: 'review',
-    sector: 'Mining'
-  },
-  {
-    id: 'APL-1023',
-    candidate: 'Sarah Johnson',
-    position: 'Tour Guide',
-    date: '2023-11-14',
-    status: 'interview',
-    sector: 'Tourism'
-  },
-  {
-    id: 'APL-1022',
-    candidate: 'Michael Chen',
-    position: 'Production Supervisor',
-    date: '2023-11-12',
-    status: 'hired',
-    sector: 'Manufacturing'
-  },
-  {
-    id: 'APL-1021',
-    candidate: 'Emma Wilson',
-    position: 'Geologist',
-    date: '2023-11-10',
-    status: 'rejected',
-    sector: 'Mining'
-  },
-];
+  const applications = [
+    {
+      id: 'APL-1024',
+      candidate: 'John Smith',
+      position: 'Mining Engineer',
+      date: '2023-11-15',
+      status: 'review',
+      sector: 'Mining'
+    },
+    {
+      id: 'APL-1023',
+      candidate: 'Sarah Johnson',
+      position: 'Tour Guide',
+      date: '2023-11-14',
+      status: 'interview',
+      sector: 'Tourism'
+    },
+    {
+      id: 'APL-1022',
+      candidate: 'Michael Chen',
+      position: 'Production Supervisor',
+      date: '2023-11-12',
+      status: 'hired',
+      sector: 'Manufacturing'
+    },
+    {
+      id: 'APL-1021',
+      candidate: 'Emma Wilson',
+      position: 'Geologist',
+      date: '2023-11-10',
+      status: 'rejected',
+      sector: 'Mining'
+    },
+  ];
 
-const statusVariants = {
-    review: 'bg-yellow-100 text-yellow-800',
-    interview: 'bg-blue-100 text-blue-800',
-    hired: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
+  const statusVariants = {
+    review: { backgroundColor: 'rgba(255, 165, 0, 0.1)', color: 'rgba(255, 165, 0, 1)' },
+    interview: { backgroundColor: 'rgba(70, 130, 180, 0.1)', color: 'rgba(70, 130, 180, 1)' },
+    hired: { backgroundColor: '#014421', color: '#F2ECE4' },
+    rejected: { backgroundColor: 'rgba(139, 0, 0, 0.1)', color: 'rgba(139, 0, 0, 1)' },
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Application ID</TableHead>
-          <TableHead>Candidate</TableHead>
-          <TableHead>Position</TableHead>
-          <TableHead>Sector</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Action</TableHead>
+    <Table style={{ borderSpacing: 0 }}>
+      <TableHeader style={{ backgroundColor: 'transparent' }}>
+        <TableRow style={{ backgroundColor: 'transparent' }}>
+          <TableHead style={{ 
+            color: '#8C3C1E', 
+            fontWeight: '500', 
+            borderBottom: '1px solid rgba(140, 60, 30, 0.2)',
+            padding: '0.75rem 1rem'
+          }}>
+            Application ID
+          </TableHead>
+          <TableHead style={{ 
+            color: '#8C3C1E', 
+            fontWeight: '500', 
+            borderBottom: '1px solid rgba(140, 60, 30, 0.2)',
+            padding: '0.75rem 1rem'
+          }}>
+            Candidate
+          </TableHead>
+          <TableHead style={{ 
+            color: '#8C3C1E', 
+            fontWeight: '500', 
+            borderBottom: '1px solid rgba(140, 60, 30, 0.2)',
+            padding: '0.75rem 1rem'
+          }}>
+            Position
+          </TableHead>
+          <TableHead style={{ 
+            color: '#8C3C1E', 
+            fontWeight: '500', 
+            borderBottom: '1px solid rgba(140, 60, 30, 0.2)',
+            padding: '0.75rem 1rem'
+          }}>
+            Sector
+          </TableHead>
+          <TableHead style={{ 
+            color: '#8C3C1E', 
+            fontWeight: '500', 
+            borderBottom: '1px solid rgba(140, 60, 30, 0.2)',
+            padding: '0.75rem 1rem'
+          }}>
+            Date
+          </TableHead>
+          <TableHead style={{ 
+            color: '#8C3C1E', 
+            fontWeight: '500', 
+            borderBottom: '1px solid rgba(140, 60, 30, 0.2)',
+            padding: '0.75rem 1rem'
+          }}>
+            Status
+          </TableHead>
+          <TableHead style={{ 
+            color: '#8C3C1E', 
+            fontWeight: '500', 
+            borderBottom: '1px solid rgba(140, 60, 30, 0.2)',
+            padding: '0.75rem 1rem',
+            textAlign: 'right'
+          }}>
+            Action
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {applications.map((app) => (
-          <TableRow key={app.id}>
-            <TableCell className="font-medium">{app.id}</TableCell>
-            <TableCell>{app.candidate}</TableCell>
-            <TableCell>{app.position}</TableCell>
-            <TableCell>
-              <Badge variant="outline">{app.sector}</Badge>
+          <TableRow key={app.id} style={{ backgroundColor: 'transparent' }}>
+            <TableCell style={{ 
+              fontWeight: '500', 
+              color: '#132857', 
+              borderBottom: '1px solid rgba(140, 60, 30, 0.1)',
+              padding: '0.75rem 1rem'
+            }}>
+              {app.id}
             </TableCell>
-            <TableCell>{new Date(app.date).toLocaleDateString()}</TableCell>
-            <TableCell>
-              <Badge className={statusVariants[app.status]}>
+            <TableCell style={{ 
+              color: '#1A1A1A', 
+              borderBottom: '1px solid rgba(140, 60, 30, 0.1)',
+              padding: '0.75rem 1rem'
+            }}>
+              {app.candidate}
+            </TableCell>
+            <TableCell style={{ 
+              color: '#1A1A1A', 
+              borderBottom: '1px solid rgba(140, 60, 30, 0.1)',
+              padding: '0.75rem 1rem'
+            }}>
+              {app.position}
+            </TableCell>
+            <TableCell style={{ 
+              borderBottom: '1px solid rgba(140, 60, 30, 0.1)',
+              padding: '0.75rem 1rem'
+            }}>
+              <Badge style={{ 
+                borderColor: 'rgba(140, 60, 30, 0.5)',
+                color: '#8C3C1E',
+                backgroundColor: 'rgba(242, 236, 228, 0.5)'
+              }}>
+                {app.sector}
+              </Badge>
+            </TableCell>
+            <TableCell style={{ 
+              color: 'rgba(140, 60, 30, 0.8)',
+              borderBottom: '1px solid rgba(140, 60, 30, 0.1)',
+              padding: '0.75rem 1rem'
+            }}>
+              {new Date(app.date).toLocaleDateString()}
+            </TableCell>
+            <TableCell style={{ 
+              borderBottom: '1px solid rgba(140, 60, 30, 0.1)',
+              padding: '0.75rem 1rem'
+            }}>
+              <Badge style={{ 
+                ...statusVariants[app.status],
+                fontWeight: '500'
+              }}>
                 {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
               </Badge>
             </TableCell>
-            <TableCell className="text-right">
-              <button className="text-blue-600 hover:text-blue-800">
-                <FiExternalLink className="h-4 w-4" />
+            <TableCell style={{ 
+              textAlign: 'right',
+              borderBottom: '1px solid rgba(140, 60, 30, 0.1)',
+              padding: '0.75rem 1rem'
+            }}>
+              <button style={{ 
+                color: '#132857',
+                transition: 'color 0.2s'
+              }}>
+                <FiExternalLink style={{ height: '1rem', width: '1rem' }} />
               </button>
             </TableCell>
           </TableRow>

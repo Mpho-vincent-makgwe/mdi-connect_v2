@@ -40,14 +40,14 @@ const NavItem = ({ item, isActive, onClick, mobile = false }) => {
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
             isActive
-              ? "bg-blue-50 text-blue-600"
-              : "text-gray-700 hover:bg-gray-100"
+              ? "bg-navy text-cream"
+              : "text-brown hover:bg-cream"
           )}
           onClick={onClick}
         >
           <span className={cn(
             "text-lg",
-            isActive ? "text-blue-600" : "text-gray-500"
+            isActive ? "text-cream" : "text-brown"
           )}>
             {item.icon}
           </span>
@@ -63,14 +63,14 @@ const NavItem = ({ item, isActive, onClick, mobile = false }) => {
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
         isActive
-          ? "bg-blue-50 text-blue-600"
-          : "text-gray-700 hover:bg-gray-100"
+          ? "bg-navy text-cream"
+          : "text-brown hover:bg-cream"
       )}
       onClick={onClick}
     >
       <span className={cn(
         "text-lg",
-        isActive ? "text-blue-600" : "text-gray-500"
+        isActive ? "text-cream" : "text-brown"
       )}>
         {item.icon}
       </span>
@@ -101,7 +101,7 @@ export default function Sidebar() {
     return (
       <>
         {/* Mobile Bottom Navigation */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#F2ECE4] border-t border-brown/20 z-40">
           <nav className="p-2" aria-label="Mobile navigation">
             <ul className="flex justify-around">
               {menuItems.slice(0, 4).map((item, idx) => {
@@ -110,7 +110,7 @@ export default function Sidebar() {
                   <li key={idx}>
                     <Link
                       href={item.href}
-                      className={`flex flex-col items-center p-2 text-xs ${isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"}`}
+                      className={`flex flex-col items-center p-2 text-xs ${isActive ? "text-navy" : "text-brown hover:text-navy"}`}
                       onClick={handleCloseSheet}
                       aria-current={isActive ? "page" : undefined}
                     >
@@ -124,7 +124,7 @@ export default function Sidebar() {
                 <Sheet>
                   <SheetTrigger asChild>
                     <button 
-                      className="flex flex-col items-center p-2 text-xs text-gray-600 hover:text-blue-600"
+                      className="flex flex-col items-center p-2 text-xs text-brown hover:text-navy"
                       aria-label="Open menu"
                     >
                       <span className="text-lg" aria-hidden="true"><FiMenu /></span>
@@ -133,11 +133,11 @@ export default function Sidebar() {
                   </SheetTrigger>
                   <SheetContent 
                     side="left" 
-                    className="w-[280px] p-0"
+                    className="w-[280px] p-0 bg-cream"
                     aria-label="Navigation menu"
                   >
                     <div className="flex flex-col h-full">
-                      <div className="flex items-center h-16 px-6 border-b">
+                      <div className="flex items-center h-16 px-6 border-b border-brown/20">
                         <Logo className="h-8 w-auto" />
                       </div>
                       <nav className="flex-1 p-4 overflow-y-auto">
@@ -157,10 +157,10 @@ export default function Sidebar() {
                           })}
                         </ul>
                       </nav>
-                      <div className="p-4 border-t">
+                      <div className="p-4 border-t border-brown/20">
                         <Button 
                           variant="outline" 
-                          className="w-full" 
+                          className="w-full border-brown text-brown hover:bg-brown/10" 
                           onClick={() => {
                             logout();
                             handleCloseSheet();
@@ -186,10 +186,10 @@ export default function Sidebar() {
   // Desktop Sidebar
   return (
     <aside 
-      className="hidden lg:flex flex-col w-64 bg-white h-screen fixed left-0 top-0 z-20 border-r border-gray-200"
+      className="hidden lg:flex flex-col w-64 bg-[#F2ECE4] h-screen fixed left-0 top-0 z-20 border-r border-brown/20"
       aria-label="Sidebar"
     >
-      <div className="flex items-center h-16 px-6 border-b">
+      <div className="flex items-center h-16 px-6 border-b border-brown/20">
         <Logo className="h-8 w-auto" />
       </div>
       <nav className="flex-1 p-4 overflow-y-auto">
@@ -207,10 +207,10 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t bg-[#efe587] border-brown/20">
         <Button 
           variant="outline" 
-          className="w-full" 
+          className="w-full border-brown text-brown hover:bg-brown/10" 
           onClick={logout}
         >
           <div className="flex items-center gap-2">

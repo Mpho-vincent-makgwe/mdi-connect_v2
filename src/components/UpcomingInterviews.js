@@ -1,3 +1,4 @@
+// components/UpcomingInterviews.js
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -33,28 +34,70 @@ const interviews = [
 
 export default function UpcomingInterviews() {
   return (
-    <div className="space-y-4">
+    <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
       {interviews.map((interview) => (
-        <div key={interview.id} className="flex items-center p-4 border rounded-lg">
-          <Avatar className="h-10 w-10">
+        <div 
+          key={interview.id} 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '1rem',
+            border: '1px solid rgba(140, 60, 30, 0.2)',
+            borderRadius: '0.5rem',
+            backgroundColor: '#F2ECE4',
+            marginBottom: '1rem',
+            transition: 'box-shadow 0.3s ease',
+            cursor: 'pointer'
+          }}
+          className="hover:shadow-md"
+        >
+          <Avatar style={{ height: '2.5rem', width: '2.5rem' }}>
             <AvatarImage src={interview.avatar} />
-            <AvatarFallback>{interview.candidate.charAt(0)}</AvatarFallback>
+            <AvatarFallback style={{ 
+              backgroundColor: '#132857', 
+              color: '#F2ECE4', 
+              fontWeight: '500'
+            }}>
+              {interview.candidate.charAt(0)}
+            </AvatarFallback>
           </Avatar>
-          <div className="ml-4 space-y-1 flex-1">
-            <p className="text-sm font-medium leading-none">{interview.candidate}</p>
-            <p className="text-sm text-gray-500">{interview.position}</p>
-            <div className="flex items-center pt-1 text-sm text-gray-500">
-              <FiCalendar className="mr-1 h-4 w-4" />
+          <div style={{ marginLeft: '1rem', flex: 1 }}>
+            <p style={{ 
+              fontSize: '0.875rem', 
+              fontWeight: '500', 
+              lineHeight: '1.25rem', 
+              color: '#4682B4'
+            }}>
+              {interview.candidate}
+            </p>
+            <p style={{ 
+              fontSize: '0.875rem', 
+              color: 'rgba(140, 60, 30, 0.8)'
+            }}>
+              {interview.position}
+            </p>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              paddingTop: '0.25rem', 
+              fontSize: '0.875rem', 
+              color: 'rgba(140, 60, 30, 0.8)'
+            }}>
+              <FiCalendar style={{ marginRight: '0.25rem', height: '1rem', width: '1rem', color: 'rgba(140, 60, 30, 0.6)' }} />
               {new Date(interview.date).toLocaleDateString()}
-              <FiClock className="ml-3 mr-1 h-4 w-4" />
+              <FiClock style={{ marginLeft: '0.75rem', marginRight: '0.25rem', height: '1rem', width: '1rem', color: 'rgba(140, 60, 30, 0.6)' }} />
               {new Date(interview.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
-          <Button variant="outline" size="sm" className="ml-auto">
+          <Button 
+            variant={interview.type === 'video' ? 'secondary' : 'outline'} 
+            size="sm" 
+            style={{ marginLeft: 'auto' }}
+          >
             {interview.type === 'video' ? (
-              <FiVideo className="mr-2 h-4 w-4" />
+              <FiVideo style={{ marginRight: '0.5rem', height: '1rem', width: '1rem' }} />
             ) : (
-              <FiCalendar className="mr-2 h-4 w-4" />
+              <FiCalendar style={{ marginRight: '0.5rem', height: '1rem', width: '1rem' }} />
             )}
             Join
           </Button>
