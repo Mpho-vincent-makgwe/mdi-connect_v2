@@ -76,24 +76,24 @@ export function UserProvider({ children }) {
     }
   };
 
-  const register = async (userData) => {
-    try {
-      const response = await apiHelper.register(userData);
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Registration failed');
-      }
-      
-      localStorage.setItem('token', response.token);
-      setUser(response.user);
-      router.push('/auth/login');
-      toast.success('Registration successful! Please login.');
-      return response.user;
-    } catch (error) {
-      toast.error(error.message || 'Registration failed');
-      throw error;
+ const register = async (userData) => {
+  try {
+    const response = await apiHelper.register(userData);
+    
+    if (!response.success) {
+      throw new Error(response.message || 'Registration failed');
     }
-  };
+    
+    localStorage.setItem('token', response.token);
+    setUser(response.user);
+    router.push('/auth/login');
+    toast.success('Registration successful! Please login.');
+    return response.user;
+  } catch (error) {
+    toast.error(error.message || 'Registration failed');
+    throw error;
+  }
+};
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');

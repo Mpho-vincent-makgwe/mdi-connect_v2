@@ -10,11 +10,17 @@ const api = axios.create({
 const apiHelper = {
   request: async (method, endpoint, data = {}, config = {}) => {
     try {
+      // Ensure we're sending proper JSON for non-multipart requests
+      const isFormData = data instanceof FormData;
+      
       const response = await api({
         method,
         url: endpoint,
-        data,
-        ...config
+        data: !isFormData ? JSON.stringify(data) : data,
+        headers: {
+          ...config.headers,
+          ...(!isFormData && { 'Content-Type': 'application/json' })
+        }
       });
       return response.data;
     } catch (error) {
@@ -32,14 +38,9 @@ const apiHelper = {
     return apiHelper.request('POST', '/auth/login', { email, password });
   },
 
-  register: async (name, email, password, role) => {
-    return apiHelper.request('POST', '/auth/register', { 
-      name, 
-      email, 
-      password, 
-      role 
-    });
-  },
+  register: async (userData) => {
+  return apiHelper.request('POST', '/auth/register', userData);
+},
 
   getProfile: async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;

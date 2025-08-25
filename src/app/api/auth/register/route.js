@@ -7,9 +7,13 @@ export async function POST(request) {
   await dbConnect();
   
   try {
-    const { name, email, password, role } = await request.json();
+    const body = await request.json();
+    console.log('Registration request body:', body);
+    
+    const { name, email, password, role } = body;
     
     if (!name || !email || !password) {
+      console.log('Missing fields:', { name, email, password });
       return NextResponse.json(
         { success: false, message: 'Name, email, and password are required' },
         { status: 400 }
