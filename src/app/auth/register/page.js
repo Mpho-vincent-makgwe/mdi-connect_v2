@@ -1,20 +1,59 @@
+// pages/auth/register.js
 'use client';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function RegisterPage() {
   const { register } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const invitationToken = searchParams.get('token');
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'unskilled', // Default role
+    role: 'unskilled',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [invitationValid, setInvitationValid] = useState(false);
+  const [invitationLoading, setInvitationLoading] = useState(!!invitationToken);
+
+  // Check invitation token on component mount
+  useEffect(() => {
+    const checkInvitation = async () => {
+      if (!invitationToken) {
+        setInvitationLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/auth/validate-invitation?token=${invitationToken}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setFormData(prev => ({
+            ...prev,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role
+          }));
+          setInvitationValid(true);
+        } else {
+          setError('Invalid or expired invitation link');
+        }
+      } catch (err) {
+        setError('Failed to validate invitation');
+      } finally {
+        setInvitationLoading(false);
+      }
+    };
+
+    checkInvitation();
+  }, [invitationToken]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,7 +66,12 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      await register(formData);
+      // Include invitation token if available
+      const registrationData = invitationToken 
+        ? { ...formData, invitationToken }
+        : formData;
+      
+      await register(registrationData);
     } catch (err) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -35,15 +79,52 @@ export default function RegisterPage() {
     }
   };
 
+  // Show loading while checking invitation
+  if (invitationLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Validating invitation...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if invitation is invalid
+  if (invitationToken && !invitationValid) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Invalid Invitation</h2>
+          <p className="text-gray-600 mb-6">{error || 'This invitation link is invalid or has expired.'}</p>
+          <Link
+            href="/auth/login"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
+          {invitationValid ? 'Complete Your Registration' : 'Create your account'}
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        {invitationValid && (
+          <>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            You've been invited by an administrator
+          </p>
+          <p className="mt-2 text-center text-sm text-gray-600">
           Join as a {formData.role} worker
         </p>
+        </>
+        )}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

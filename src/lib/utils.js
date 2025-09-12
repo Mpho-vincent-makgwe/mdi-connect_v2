@@ -10,3 +10,7 @@ export function formatDate(dateString) {
     day: 'numeric',
   });
 }
+
+export const generateToken = () => {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+};

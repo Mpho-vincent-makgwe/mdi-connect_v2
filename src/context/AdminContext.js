@@ -305,6 +305,29 @@ export const AdminProvider = ({ children }) => {
     }
   }, [user]);
 
+  const inviteUser = useCallback(async (userData) => {
+  if (!user || user.role !== 'admin') return;
+  
+  try {
+    setLoading(true);
+    const response = await apiHelper.inviteUser(userData);
+    
+    if (response.success) {
+      toast.success('User invited successfully');
+      return true;
+    } else {
+      toast.error(response.message || 'Failed to invite user');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error inviting user:', error);
+    toast.error('Failed to invite user');
+    return false;
+  } finally {
+    setLoading(false);
+  }
+}, [user]);
+
   const value = {
     adminStats,
     users,
@@ -322,7 +345,8 @@ export const AdminProvider = ({ children }) => {
     updateApplicationStatus,
     updateJob,
     deleteJob,
-    createJob
+    createJob,
+    inviteUser
   };
 
   return (

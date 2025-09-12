@@ -82,7 +82,18 @@ const UserSchema = new mongoose.Schema({
       delete ret.password;
       return ret;
     }
-  }
+  },
+  invitedByAdmin: {
+    type: Boolean,
+    default: false
+  },
+  invitationToken: {
+    type: String,
+    unique: true
+  },
+  invitationExpires: {
+    type: Date
+  },
 });
 
 // Virtual for application count

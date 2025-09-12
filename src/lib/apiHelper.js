@@ -138,6 +138,12 @@ const apiHelper = {
     const query = new URLSearchParams(filters).toString();
     return apiHelper.request('GET', `/admin/jobs?${query}`);
   },
+  
+  
+  inviteUser: async (userData) => {
+  return apiHelper.request('POST', '/admin/users/invite', userData);
+},
+
 
   createJob: async (jobData) => {
     return apiHelper.request('POST', '/admin/jobs', jobData);
