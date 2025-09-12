@@ -11,6 +11,8 @@ export default function CompleteRegistrationPage() {
   const invitationToken = searchParams.get('token');
   
   const [formData, setFormData] = useState({
+    email: '',
+    oldPassword: '',
     role: 'unskilled',
     newPassword: '',
     confirmPassword: ''
@@ -37,6 +39,7 @@ export default function CompleteRegistrationPage() {
           setUserData(data.user);
           setFormData(prev => ({
             ...prev,
+            email: data.user.email,
             role: data.user.role
           }));
           setInvitationValid(true);
@@ -63,6 +66,13 @@ export default function CompleteRegistrationPage() {
     setLoading(true);
     setError('');
 
+    // Validate all required fields
+    if (!formData.email || !formData.oldPassword || !formData.newPassword) {
+      setError('All fields are required');
+      setLoading(false);
+      return;
+    }
+
     // Validate passwords match
     if (formData.newPassword !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -85,6 +95,8 @@ export default function CompleteRegistrationPage() {
         },
         body: JSON.stringify({
           invitationToken,
+          email: formData.email,
+          oldPassword: formData.oldPassword,
           role: formData.role,
           newPassword: formData.newPassword
         }),
@@ -167,6 +179,39 @@ export default function CompleteRegistrationPage() {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your email"
+                disabled={!!userData} // Disable if email is pre-filled from invitation
+              />
+            </div>
+
+            <div>
+              <label htmlFor="oldPassword" className="block text-sm font-medium text-gray-700">
+                Temporary Password
+              </label>
+              <input
+                id="oldPassword"
+                name="oldPassword"
+                type="password"
+                required
+                value={formData.oldPassword}
+                onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter temporary password"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 I am a:

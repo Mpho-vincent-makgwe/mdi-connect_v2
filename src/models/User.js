@@ -95,7 +95,7 @@ const UserSchema = new mongoose.Schema({
     type: Date
   },
   temporaryPassword: {
-  type: String,
+  type: Bollean,
   select: false // Don't include this field in queries by default
 }
 });

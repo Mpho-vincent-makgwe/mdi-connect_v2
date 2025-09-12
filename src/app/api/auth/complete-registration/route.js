@@ -7,9 +7,9 @@ export async function POST(request) {
   await dbConnect();
 
   try {
-    const { invitationToken, role, newPassword } = await request.json();
+    const { invitationToken, email, oldPassword, role, newPassword } = await request.json();
 
-    if (!invitationToken || !role) {
+    if (!invitationToken || !email || !oldPassword || !role) {
       return NextResponse.json(
         { success: false, message: 'Invalid request' },
         { status: 400 }
@@ -25,6 +25,15 @@ export async function POST(request) {
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'Invalid or expired invitation token' },
+        { status: 400 }
+      );
+    }
+
+    // Verify the old/temporary password
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid temporary password' },
         { status: 400 }
       );
     }
