@@ -3,7 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 
-// GET /api/users/me - Get current user profile
+// GET /api//me - Get current user profile
 export async function GET(request) {
   await dbConnect();
   

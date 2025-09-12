@@ -1,3 +1,4 @@
+// contexts/UserContext.js (update)
 'use client';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -25,9 +26,25 @@ export function UserProvider({ children }) {
       
       if (response.success) {
         setUser(response.user);
-        // Redirect logic for questionnaire
+        
+        // Redirect logic based on user role
         const currentPath = window.location.pathname;
-        if (!response.user.completedQuestionnaire && 
+        
+        // If user is admin and not on an admin page, redirect to admin dashboard
+        if (response.user.role === 'admin' && !currentPath.startsWith('/admin')) {
+          router.push('/admin/dashboard');
+          return;
+        }
+        
+        // If user is not admin and on an admin page, redirect to home
+        if (response.user.role !== 'admin' && currentPath.startsWith('/admin')) {
+          router.push('/');
+          return;
+        }
+        
+        // Redirect logic for questionnaire (only for non-admin users)
+        if (response.user.role !== 'admin' && 
+            !response.user.completedQuestionnaire && 
             !currentPath.includes('/questionnaire') &&
             !currentPath.includes('/auth')) {
           router.push('/questionnaire');
@@ -62,7 +79,10 @@ export function UserProvider({ children }) {
       localStorage.setItem('token', response.token);
       setUser(response.user);
       
-      if (!response.user.completedQuestionnaire) {
+      // Redirect based on role
+      if (response.user.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else if (!response.user.completedQuestionnaire) {
         router.push('/questionnaire');
       } else {
         router.push('/');
@@ -76,24 +96,24 @@ export function UserProvider({ children }) {
     }
   };
 
- const register = async (userData) => {
-  try {
-    const response = await apiHelper.register(userData);
-    
-    if (!response.success) {
-      throw new Error(response.message || 'Registration failed');
+  const register = async (userData) => {
+    try {
+      const response = await apiHelper.register(userData);
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Registration failed');
+      }
+      
+      localStorage.setItem('token', response.token);
+      setUser(response.user);
+      router.push('/auth/login');
+      toast.success('Registration successful! Please login.');
+      return response.user;
+    } catch (error) {
+      toast.error(error.message || 'Registration failed');
+      throw error;
     }
-    
-    localStorage.setItem('token', response.token);
-    setUser(response.user);
-    router.push('/auth/login');
-    toast.success('Registration successful! Please login.');
-    return response.user;
-  } catch (error) {
-    toast.error(error.message || 'Registration failed');
-    throw error;
-  }
-};
+  };
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');

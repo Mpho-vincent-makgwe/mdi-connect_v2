@@ -1,3 +1,4 @@
+// JobApplicationModal.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -81,7 +82,6 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
 
   useEffect(() => {
     if (open) {
-      // Reset form when modal opens
       setApplication({
         name: '',
         email: '',
@@ -96,17 +96,22 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
+      <DialogContent style={{
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        backgroundColor: '#F2ECE4',
+        borderRadius: '0.5rem'
+      }}>
         <DialogHeader>
-          <DialogTitle>Apply for {job.title}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle style={{ color: '#1A1A1A' }}>Apply for {job.title}</DialogTitle>
+          <DialogDescription style={{ color: 'rgba(140, 60, 30, 0.7)' }}>
             Complete the form to apply for this position at {job.company}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Label htmlFor="name" style={{ color: '#1A1A1A' }}>Full Name</Label>
             <Input
               id="name"
               name="name"
@@ -116,8 +121,8 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Label htmlFor="email" style={{ color: '#1A1A1A' }}>Email</Label>
             <Input
               id="email"
               name="email"
@@ -128,8 +133,8 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Label htmlFor="phone" style={{ color: '#1A1A1A' }}>Phone Number</Label>
             <Input
               id="phone"
               name="phone"
@@ -140,8 +145,8 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="linkedin">LinkedIn Profile (Optional)</Label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Label htmlFor="linkedin" style={{ color: '#1A1A1A' }}>LinkedIn Profile (Optional)</Label>
             <Input
               id="linkedin"
               name="linkedin"
@@ -151,20 +156,20 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="coverLetter">Cover Letter</Label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Label htmlFor="coverLetter" style={{ color: '#1A1A1A' }}>Cover Letter</Label>
             <Textarea
               id="coverLetter"
               name="coverLetter"
               value={application.coverLetter}
               onChange={handleChange}
               required
-              rows={5}
+              style={{ minHeight: '7.5rem' }}
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="resume">Resume (PDF or DOCX)</Label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <Label htmlFor="resume" style={{ color: '#1A1A1A' }}>Resume (PDF or DOCX)</Label>
             <Input
               id="resume"
               name="resume"
@@ -176,19 +181,32 @@ export default function JobApplicationModal({ job, open, onOpenChange }) {
           </div>
           
           {error && (
-            <p className="text-red-500 text-sm">{error}</p>
+            <p style={{ color: '#8B0000', fontSize: '0.875rem' }}>{error}</p>
           )}
           
-          <DialogFooter>
+          <DialogFooter style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '0.5rem',
+            paddingTop: '1rem'
+          }}>
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              style={{
+                borderColor: '#8C3C1E',
+                color: '#8C3C1E',
+                backgroundColor: 'transparent'
+              }}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} style={{
+              backgroundColor: '#132857',
+              color: '#F2ECE4'
+            }}>
               {loading ? 'Submitting...' : 'Submit Application'}
             </Button>
           </DialogFooter>

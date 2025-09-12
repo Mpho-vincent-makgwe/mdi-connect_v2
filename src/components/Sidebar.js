@@ -1,4 +1,4 @@
-// components/Sidebar.js
+// components/Sidebar.js (update)
 'use client';
 
 import Link from "next/link";
@@ -13,7 +13,11 @@ import {
   FiLogOut,
   FiUser,
   FiBell,
-  FiMenu
+  FiMenu,
+  FiUsers,
+  FiBarChart2,
+  FiPlusSquare,
+  FiMonitor
 } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -21,7 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { useUser } from "@/context/UserContext";
 
-const menuItems = [
+// Regular user menu items
+const userMenuItems = [
   { label: "Dashboard", icon: <FiHome />, href: "/" },
   { label: "Job Board", icon: <FiBriefcase />, href: "/jobs" },
   { label: "My Applications", icon: <FiFileText />, href: "/applications" },
@@ -29,6 +34,17 @@ const menuItems = [
   { label: "Notifications", icon: <FiBell />, href: "/notifications" },
   { label: "Profile", icon: <FiUser />, href: "/profile" },
   { label: "Settings", icon: <FiSettings />, href: "/settings" },
+];
+
+// Admin menu items
+const adminMenuItems = [
+  { label: "Dashboard", icon: <FiBarChart2 />, href: "/admin/dashboard" },
+  { label: "Users", icon: <FiUsers />, href: "/admin/users" },
+  { label: "Jobs", icon: <FiBriefcase />, href: "/admin/jobs" },
+  { label: "Applications", icon: <FiFileText />, href: "/admin/applications" },
+  { label: "Interviews", icon: <FiCalendar />, href: "/admin/interviews" },
+  { label: "Post Job", icon: <FiPlusSquare />, href: "/admin/jobs/new" },
+  { label: "Analytics", icon: <FiMonitor />, href: "/admin/analytics" },
 ];
 
 const NavItem = ({ item, isActive, onClick, mobile = false }) => {
@@ -83,7 +99,15 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useUser();
+  const { user, logout } = useUser();
+  
+  // Determine which menu items to show based on user role
+  const menuItems = user?.role === 'admin' ? adminMenuItems : userMenuItems;
+  
+  // For mobile, we show a subset of menu items
+  const mobileMenuItems = user?.role === 'admin' 
+    ? adminMenuItems.slice(0, 4) 
+    : userMenuItems.slice(0, 4);
 
   useEffect(() => {
     const handleResize = () => {
@@ -104,7 +128,7 @@ export default function Sidebar() {
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#F2ECE4] border-t border-brown/20 z-40">
           <nav className="p-2" aria-label="Mobile navigation">
             <ul className="flex justify-around">
-              {menuItems.slice(0, 4).map((item, idx) => {
+              {mobileMenuItems.map((item, idx) => {
                 const isActive = pathname === item.href;
                 return (
                   <li key={idx}>

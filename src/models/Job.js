@@ -93,7 +93,7 @@ const JobSchema = new mongoose.Schema({
 
 // Virtual for application count
 JobSchema.virtual('applicationCount').get(function() {
-  return this.applications.length;
+  return this.applications?.length || 0;
 });
 
 // Indexes

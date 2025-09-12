@@ -1,3 +1,4 @@
+// models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -39,7 +40,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: { 
     type: String, 
-    enum: ["skilled", "unskilled"], 
+    enum: ["admin", "skilled", "unskilled"], // Added admin role
     default: "unskilled" 
   },
   completedQuestionnaire: {
@@ -86,7 +87,7 @@ const UserSchema = new mongoose.Schema({
 
 // Virtual for application count
 UserSchema.virtual('applicationCount').get(function() {
-  return this.applications.length;
+  return this.applications?.length || 0;
 });
 
 // Password hashing middleware

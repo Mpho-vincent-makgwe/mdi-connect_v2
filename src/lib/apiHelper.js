@@ -7,21 +7,53 @@ const api = axios.create({
   }
 });
 
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 const apiHelper = {
   request: async (method, endpoint, data = {}, config = {}) => {
     try {
-      // Ensure we're sending proper JSON for non-multipart requests
       const isFormData = data instanceof FormData;
       
       const response = await api({
         method,
         url: endpoint,
-        data: !isFormData ? JSON.stringify(data) : data,
+        data: !isFormData ? data : data,
         headers: {
           ...config.headers,
-          ...(!isFormData && { 'Content-Type': 'application/json' })
-        }
+          ...(isFormData && { 'Content-Type': 'multipart/form-data' })
+        },
+        ...config
       });
+      
       return response.data;
     } catch (error) {
       console.error('API request error:', error);
@@ -39,61 +71,31 @@ const apiHelper = {
   },
 
   register: async (userData) => {
-  return apiHelper.request('POST', '/auth/register', userData);
-},
+    return apiHelper.request('POST', '/auth/register', userData);
+  },
 
   getProfile: async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('GET', '/me', {}, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
+    return apiHelper.request('GET', '/me');
   },
 
   updateProfile: async (updates) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('PUT', '/me', updates, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
+    return apiHelper.request('PUT', '/me', updates);
   },
 
   getApplications: async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('GET', '/applications', {}, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
+    return apiHelper.request('GET', '/applications');
   },
 
   getInterviews: async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('GET', '/interviews', {}, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
+    return apiHelper.request('GET', '/interviews');
   },
 
   getNotifications: async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('GET', '/notifications', {}, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
+    return apiHelper.request('GET', '/notifications');
   },
 
   markNotificationAsRead: async (id) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return apiHelper.request('PATCH', `/notifications/${id}/read`, {}, {
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      }
-    });
+    return apiHelper.request('PATCH', `/notifications/${id}/read`);
   },
 
   getJobs: async (filters = {}) => {
@@ -110,23 +112,82 @@ const apiHelper = {
   },
 
   applyForJob: async (jobId, formData) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    return apiHelper.request('POST', `/jobs/${jobId}`, formData, {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      }
+    return apiHelper.request('POST', `/jobs/${jobId}/apply`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
 
   getJobDetails: async (jobId) => {
     return apiHelper.request('GET', `/jobs/${jobId}`);
   },
+
+  // Admin methods
+  getAdminStats: async () => {
+    return apiHelper.request('GET', '/admin/stats');
+  },
+
+  getAllUsers: async (page = 1, limit = 10) => {
+    return apiHelper.request('GET', `/admin/users?page=${page}&limit=${limit}`);
+  },
+
+  getUserDetail: async (userId) => {
+    return apiHelper.request('GET', `/admin/users/${userId}`);
+  },
+
+  getAllJobs: async (filters = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return apiHelper.request('GET', `/admin/jobs?${query}`);
+  },
+
+  createJob: async (jobData) => {
+    return apiHelper.request('POST', '/admin/jobs', jobData);
+  },
+
+  updateJob: async (jobId, updates) => {
+    return apiHelper.request('PUT', `/admin/jobs/${jobId}`, updates);
+  },
+
+  deleteJob: async (jobId) => {
+    return apiHelper.request('DELETE', `/admin/jobs/${jobId}`);
+  },
+
+  getAllApplications: async (filters = {}) => {
+  const query = new URLSearchParams(filters).toString();
+  const response = await apiHelper.request('GET', `/admin/applications?${query}`);
+  
+  // Ensure we return the proper structure
+  if (response.success) {
+    return {
+      ...response,
+      data: response.data // This should contain the applications array
+    };
+  }
+  return response;
+},
+
+ getApplicationDetail: async (applicationId) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return apiHelper.request('GET', `/admin/applications/${applicationId}`, {}, {
+    headers: { 
+      Authorization: `Bearer ${token}` 
+    }
+  });
+},
+
+updateApplicationStatus: async (applicationId, status) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  return apiHelper.request('PATCH', `/admin/applications/${applicationId}`, { status }, {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+},
+
+  getAllInterviews: async (filters = {}) => {
+    const query = new URLSearchParams(filters).toString();
+    return apiHelper.request('GET', `/admin/interviews?${query}`);
+  }
 };
 
 export default apiHelper;

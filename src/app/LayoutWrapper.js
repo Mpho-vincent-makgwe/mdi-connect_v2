@@ -1,10 +1,10 @@
-// app/LayoutWrapper.js
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
 import { SearchProvider } from '@/context/SearchContext';
 import { UserProvider, useUser } from "@/context/UserContext";
 import { JobsProvider } from "@/context/JobsContext";
+import { AdminProvider } from "@/context/AdminContext";
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import { Toaster } from '@/components/ui/toaster';
@@ -85,11 +85,13 @@ function ProtectedLayout({ children }) {
 export default function LayoutWrapper({ children }) {
   return (
     <UserProvider>
-      <JobsProvider>
-        <SearchProvider>
-          <ProtectedLayout>{children}</ProtectedLayout>
-        </SearchProvider>
-      </JobsProvider>
+      <AdminProvider>
+        <JobsProvider>
+          <SearchProvider>
+            <ProtectedLayout>{children}</ProtectedLayout>
+          </SearchProvider>
+        </JobsProvider>
+      </AdminProvider>
     </UserProvider>
   );
 }
