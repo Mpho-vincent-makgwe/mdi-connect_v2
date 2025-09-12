@@ -1,37 +1,34 @@
-// pages/api/auth/validate-invitation.js
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 
-export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ success: false, message: 'Method not allowed' });
-  }
-
+export async function GET(request) {
   await dbConnect();
 
   try {
-    const { token } = req.query;
-    
+    const { searchParams } = new URL(request.url);
+    const token = searchParams.get('token');
+
     if (!token) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invitation token is required' 
-      });
+      return NextResponse.json(
+        { success: false, message: 'Token is required' },
+        { status: 400 }
+      );
     }
 
-    const user = await User.findOne({ 
+    const user = await User.findOne({
       invitationToken: token,
       invitationExpires: { $gt: new Date() }
-    }).select('name email role');
+    }).select('-password');
 
     if (!user) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid or expired invitation token' 
-      });
+      return NextResponse.json(
+        { success: false, message: 'Invalid or expired invitation token' },
+        { status: 400 }
+      );
     }
 
-    res.status(200).json({
+    return NextResponse.json({
       success: true,
       user: {
         name: user.name,
@@ -41,9 +38,9 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('Error validating invitation:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to validate invitation'
-    });
+    return NextResponse.json(
+      { success: false, message: 'Failed to validate invitation' },
+      { status: 500 }
+    );
   }
 }

@@ -94,6 +94,10 @@ const UserSchema = new mongoose.Schema({
   invitationExpires: {
     type: Date
   },
+  temporaryPassword: {
+  type: String,
+  select: false // Don't include this field in queries by default
+}
 });
 
 // Virtual for application count

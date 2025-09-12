@@ -1,26 +1,25 @@
-// pages/auth/register.js
 'use client';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-export default function RegisterPage() {
-  const { register } = useUser();
+export default function CompleteRegistrationPage() {
+  const { updateUser } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('token');
   
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
     role: 'unskilled',
+    newPassword: '',
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [invitationValid, setInvitationValid] = useState(false);
   const [invitationLoading, setInvitationLoading] = useState(!!invitationToken);
+  const [userData, setUserData] = useState(null);
 
   // Check invitation token on component mount
   useEffect(() => {
@@ -35,10 +34,9 @@ export default function RegisterPage() {
         const data = await response.json();
         
         if (data.success) {
+          setUserData(data.user);
           setFormData(prev => ({
             ...prev,
-            name: data.user.name,
-            email: data.user.email,
             role: data.user.role
           }));
           setInvitationValid(true);
@@ -65,15 +63,50 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
 
+    // Validate passwords match
+    if (formData.newPassword !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Validate password length
+    if (formData.newPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Include invitation token if available
-      const registrationData = invitationToken 
-        ? { ...formData, invitationToken }
-        : formData;
-      
-      await register(registrationData);
+      const response = await fetch('/api/auth/complete-registration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invitationToken,
+          role: formData.role,
+          newPassword: formData.newPassword
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update user context
+        await updateUser({ completedQuestionnaire: true });
+        
+        // Redirect based on role
+        if (data.user.role === 'admin') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/questionnaire');
+        }
+      } else {
+        setError(data.message || 'Failed to complete registration');
+      }
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      setError('Failed to complete registration');
     } finally {
       setLoading(false);
     }
@@ -113,17 +146,15 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {invitationValid ? 'Complete Your Registration' : 'Create your account'}
+          Complete Your Registration
         </h2>
-        {invitationValid && (
-          <>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            You've been invited by an administrator
-          </p>
-          <p className="mt-2 text-center text-sm text-gray-600">
-          Join as a {formData.role} worker
+        <p className="mt-2 text-center text-sm text-gray-600">
+          You've been invited by an administrator
         </p>
-        </>
+        {userData && (
+          <p className="mt-1 text-center text-sm text-gray-600">
+            Welcome, {userData.name} ({userData.email})
+          </p>
         )}
       </div>
 
@@ -136,54 +167,6 @@ export default function RegisterPage() {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={6}
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 I am a:
@@ -207,37 +190,49 @@ export default function RegisterPage() {
             </div>
 
             <div>
+              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                New Password
+              </label>
+              <input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                required
+                minLength={6}
+                value={formData.newPassword}
+                onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter new password"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                minLength={6}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Confirm new password"
+              />
+            </div>
+
+            <div>
               <button
                 type="submit"
                 disabled={loading}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {loading ? 'Registering...' : 'Register'}
+                {loading ? 'Completing Registration...' : 'Complete Registration'}
               </button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Already have an account?
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Link
-                href="/auth/login"
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Sign in
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </div>

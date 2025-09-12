@@ -141,9 +141,11 @@ const apiHelper = {
   
   
   inviteUser: async (userData) => {
-  return apiHelper.request('POST', '/admin/user/invite', userData);
+  return apiHelper.request('POST', '/admin/users/invite', userData);
 },
-
+completeRegistration: async (data) => {
+  return apiHelper.request('POST', '/auth/complete-registration', data);
+},
 
   createJob: async (jobData) => {
     return apiHelper.request('POST', '/admin/jobs', jobData);
