@@ -1,87 +1,235 @@
-// JobCard.js
+// components/AdminDashboard/JobForm.js
 'use client';
 
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { useJobs } from '@/context/JobsContext';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import apiHelper from '@/lib/apiHelper';
 
-export default function JobCard({ job }) {
-  const router = useRouter();
-  const { hasAppliedToJob } = useJobs();
-  
-  const hasApplied = hasAppliedToJob(job._id || job.id);
+export default function JobForm({ job, onSuccess, onCancel }) {
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: job?.title || '',
+    company: job?.company || '',
+    sector: job?.sector || '',
+    location: job?.location || '',
+    salary: job?.salary || '',
+    description: job?.description || '',
+    requirements: job?.requirements ? job.requirements.join('\n') : '',
+    requiredApplicants: job?.requiredApplicants || 1,
+    deadline: job?.deadline ? new Date(job.deadline).toISOString().split('T')[0] : '',
+    status: job?.status || 'Open',
+    img: job?.img || '' // Add image field
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name, value) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Convert requirements from text to array
+      const dataToSubmit = {
+        ...formData,
+        requirements: formData.requirements.split('\n').filter(req => req.trim() !== ''),
+        requiredApplicants: parseInt(formData.requiredApplicants),
+        deadline: new Date(formData.deadline).toISOString()
+      };
+
+      console.log('Submitting job data:', dataToSubmit); // Debug log
+
+      let response;
+      if (job) {
+        response = await apiHelper.updateJob(job._id, dataToSubmit);
+      } else {
+        response = await apiHelper.createJob(dataToSubmit);
+      }
+
+      if (response.success) {
+        onSuccess();
+      } else {
+        console.error('Failed to save job:', response.message);
+        alert(`Failed to save job: ${response.message}`);
+      }
+    } catch (error) {
+      console.error('Error saving job:', error);
+      alert('Error saving job. Please check the console for details.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div style={{
-      border: '1px solid rgba(140, 60, 30, 0.2)',
-      borderRadius: '0.5rem',
-      overflow: 'hidden',
-      transition: 'box-shadow 0.3s',
-      ':hover': {
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-      }
-    }}>
-      <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start'
-        }}>
-          <div>
-            <h3 style={{
-              fontWeight: 'bold',
-              fontSize: '1.125rem',
-              color: '#1A1A1A'
-            }}>{job.title}</h3>
-            <p style={{ color: 'rgba(140, 60, 30, 0.7)' }}>{job.company}</p>
+    <Card>
+      <CardHeader>
+        <CardTitle>{job ? 'Edit Job' : 'Create New Job'}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Job Title *</Label>
+              <Input
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="company">Company *</Label>
+              <Input
+                id="company"
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="sector">Sector *</Label>
+              <Select
+                value={formData.sector}
+                onValueChange={(value) => handleSelectChange('sector', value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select sector" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mining">Mining</SelectItem>
+                  <SelectItem value="Tourism">Tourism</SelectItem>
+                  <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="location">Location *</Label>
+              <Input
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="salary">Salary *</Label>
+              <Input
+                id="salary"
+                name="salary"
+                value={formData.salary}
+                onChange={handleChange}
+                placeholder="e.g., $50,000 - $70,000"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="requiredApplicants">Required Applicants *</Label>
+              <Input
+                id="requiredApplicants"
+                name="requiredApplicants"
+                type="number"
+                min="1"
+                value={formData.requiredApplicants}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="deadline">Application Deadline *</Label>
+              <Input
+                id="deadline"
+                name="deadline"
+                type="date"
+                value={formData.deadline}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleSelectChange('status', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Open">Open</SelectItem>
+                  <SelectItem value="Closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="img">Image URL *</Label>
+              <Input
+                id="img"
+                name="img"
+                value={formData.img}
+                onChange={handleChange}
+                placeholder="https://example.com/image.jpg"
+                required
+              />
+            </div>
           </div>
-          <img 
-            src={job.img} 
-            alt={job.company} 
-            style={{
-              height: '3rem',
-              width: '3rem',
-              objectFit: 'contain',
-              borderRadius: '0.25rem'
-            }}
-          />
-        </div>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <p style={{ fontSize: '0.875rem', color: 'rgba(140, 60, 30, 0.7)' }}>{job.location}</p>
-          <p style={{ fontSize: '0.875rem', color: 'rgba(140, 60, 30, 0.7)' }}>{job.sector}</p>
-          <p style={{ fontSize: '0.875rem', fontWeight: '500' }}>{job.salary}</p>
-        </div>
-        
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingTop: '0.5rem'
-        }}>
-          <Button 
-            variant="outline" 
-            onClick={() => router.push(`/jobs/${job._id || job.id}`)}
-            style={{
-              borderColor: '#8C3C1E',
-              color: '#8C3C1E',
-              backgroundColor: 'transparent'
-            }}
-          >
-            View Details
-          </Button>
-          
-          {hasApplied && (
-            <span style={{
-              fontSize: '0.875rem',
-              color: '#014421',
-              fontWeight: '500'
-            }}>
-              Applied ✓
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Job Description *</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="requirements">Requirements * (one per line)</Label>
+            <Textarea
+              id="requirements"
+              name="requirements"
+              value={formData.requirements}
+              onChange={handleChange}
+              rows={4}
+              required
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : job ? 'Update Job' : 'Create Job'}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

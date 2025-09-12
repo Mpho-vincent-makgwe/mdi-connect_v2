@@ -1,4 +1,3 @@
-// components/AdminDashboard/JobForm.js
 'use client';
 
 import { useState } from 'react';
@@ -15,14 +14,15 @@ export default function JobForm({ job, onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
     title: job?.title || '',
     company: job?.company || '',
-    sector: job?.sector || 'mining',
+    sector: job?.sector?.toLowerCase() || 'mining', // Convert to lowercase for form
     location: job?.location || '',
     salary: job?.salary || '',
     description: job?.description || '',
     requirements: job?.requirements ? job.requirements.join('\n') : '',
     requiredApplicants: job?.requiredApplicants || 1,
     deadline: job?.deadline ? new Date(job.deadline).toISOString().split('T')[0] : '',
-    status: job?.status || 'Open'
+    status: job?.status || 'Open',
+    img: job?.img || '/images/default-job.jpg'
   });
 
   const handleChange = (e) => {
@@ -56,9 +56,13 @@ export default function JobForm({ job, onSuccess, onCancel }) {
 
       if (response.success) {
         onSuccess();
+      } else {
+        console.error('Error saving job:', response.message);
+        alert(response.message || 'Failed to save job');
       }
     } catch (error) {
       console.error('Error saving job:', error);
+      alert('Failed to save job');
     } finally {
       setLoading(false);
     }
@@ -73,7 +77,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Job Title</Label>
+              <Label htmlFor="title">Job Title *</Label>
               <Input
                 id="title"
                 name="title"
@@ -84,7 +88,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="company">Company</Label>
+              <Label htmlFor="company">Company *</Label>
               <Input
                 id="company"
                 name="company"
@@ -95,7 +99,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="sector">Sector</Label>
+              <Label htmlFor="sector">Sector *</Label>
               <Select
                 value={formData.sector}
                 onValueChange={(value) => handleSelectChange('sector', value)}
@@ -112,7 +116,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location *</Label>
               <Input
                 id="location"
                 name="location"
@@ -123,7 +127,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="salary">Salary</Label>
+              <Label htmlFor="salary">Salary *</Label>
               <Input
                 id="salary"
                 name="salary"
@@ -134,7 +138,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="requiredApplicants">Required Applicants</Label>
+              <Label htmlFor="requiredApplicants">Required Applicants *</Label>
               <Input
                 id="requiredApplicants"
                 name="requiredApplicants"
@@ -147,7 +151,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deadline">Application Deadline</Label>
+              <Label htmlFor="deadline">Application Deadline *</Label>
               <Input
                 id="deadline"
                 name="deadline"
@@ -155,6 +159,17 @@ export default function JobForm({ job, onSuccess, onCancel }) {
                 value={formData.deadline}
                 onChange={handleChange}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="img">Image URL</Label>
+              <Input
+                id="img"
+                name="img"
+                value={formData.img}
+                onChange={handleChange}
+                placeholder="/images/default-job.jpg"
               />
             </div>
 
@@ -176,7 +191,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Job Description</Label>
+            <Label htmlFor="description">Job Description *</Label>
             <Textarea
               id="description"
               name="description"
@@ -188,7 +203,7 @@ export default function JobForm({ job, onSuccess, onCancel }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="requirements">Requirements (one per line)</Label>
+            <Label htmlFor="requirements">Requirements * (one per line)</Label>
             <Textarea
               id="requirements"
               name="requirements"

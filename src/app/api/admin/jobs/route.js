@@ -1,5 +1,3 @@
-// app/api/admin/jobs/route.js
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Job from '@/models/Job';
@@ -28,8 +26,6 @@ const checkAdminAuth = (request) => {
     return { success: false, message: 'Invalid token' };
   }
 
-  // You might want to check if the user is actually an admin in the database
-  // For now, we'll assume the token contains the necessary role information
   return { success: true, user: decoded };
 };
 
@@ -137,26 +133,29 @@ export async function POST(request) {
     const body = await request.json();
     
     // Validate required fields
-    const { title, company, description, requirements, location, sector, deadline } = body;
+    const { title, company, description, requirements, location, sector, deadline, salary, requiredApplicants } = body;
     
-    if (!title || !company || !description || !requirements || !location || !sector || !deadline) {
+    if (!title || !company || !description || !requirements || !location || !sector || !deadline || !salary) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
         { status: 400 }
       );
     }
     
-    // Create new job
+    // Create new job with all required fields
     const job = await Job.create({
       title,
       company,
       description,
-      requirements,
+      requirements: Array.isArray(requirements) ? requirements : requirements.split('\n').filter(req => req.trim() !== ''),
       location,
-      sector,
+      sector: sector.charAt(0).toUpperCase() + sector.slice(1), // Capitalize first letter
+      salary,
+      requiredApplicants: requiredApplicants || 1,
       deadline: new Date(deadline),
       postedBy: authResult.user.id,
-      status: 'Open'
+      status: 'Open',
+      img: body.img || '/images/default-job.jpg' // Default image
     });
     
     return NextResponse.json(
@@ -166,7 +165,10 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error creating job:', error);
     return NextResponse.json(
-      { success: false, message: 'Server error while creating job' },
+      { 
+        success: false, 
+        message: error.message || 'Server error while creating job' 
+      },
       { status: 500 }
     );
   }

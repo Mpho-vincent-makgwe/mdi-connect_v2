@@ -70,11 +70,12 @@ const JobSchema = new mongoose.Schema({
   },
   img: { 
     type: String, 
-    required: true 
+    default: "/images/default-job.jpg" // Added default value
   },
   requiredApplicants: { 
     type: Number, 
-    required: true 
+    required: true,
+    default: 1 
   },
   applications: [ApplicationSchema],
   status: { 
@@ -86,6 +87,11 @@ const JobSchema = new mongoose.Schema({
     type: Date, 
     required: true 
   },
+  postedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  }
 }, { 
   timestamps: true,
   toJSON: { virtuals: true }
