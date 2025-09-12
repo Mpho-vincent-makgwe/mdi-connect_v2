@@ -141,7 +141,7 @@ const apiHelper = {
   
   
   inviteUser: async (userData) => {
-  return apiHelper.request('POST', '/admin/users/invite', userData);
+  return apiHelper.request('POST', '/admin/user/invite', userData);
 },
 
 
