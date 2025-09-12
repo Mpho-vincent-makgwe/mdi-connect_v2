@@ -1,4 +1,3 @@
-// models/User.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -35,12 +34,14 @@ const UserSchema = new mongoose.Schema({
   },
   password: { 
     type: String, 
-    required: [true, 'Password is required'],
+    required: function() {
+      return !this.isTemporaryPassword; // Password not required if using temporary password
+    },
     minlength: [6, 'Password must be at least 6 characters']
   },
   role: { 
     type: String, 
-    enum: ["admin", "skilled", "unskilled"], // Added admin role
+    enum: ["admin", "skilled", "unskilled"],
     default: "unskilled" 
   },
   completedQuestionnaire: {
@@ -73,16 +74,7 @@ const UserSchema = new mongoose.Schema({
   },
   applications: [UserJobApplicationSchema],
   resetPasswordToken: String,
-  resetPasswordExpires: Date
-}, { 
-  timestamps: true,
-  toJSON: { 
-    virtuals: true,
-    transform: function(doc, ret) {
-      delete ret.password;
-      return ret;
-    }
-  },
+  resetPasswordExpires: Date,
   invitedByAdmin: {
     type: Boolean,
     default: false
@@ -95,9 +87,31 @@ const UserSchema = new mongoose.Schema({
     type: Date
   },
   temporaryPassword: {
-  type: Boolean,
-  select: false // Don't include this field in queries by default
-}
+    type: String,
+    select: true // This ensures it's included in queries
+  },
+  isTemporaryPassword: {
+    type: Boolean,
+    default: false
+  },
+  isActive: {
+    type: Boolean,
+    default: false
+  },
+  invitationSent: {
+    type: Boolean,
+    default: false
+  }
+}, { 
+  timestamps: true,
+  toJSON: { 
+    virtuals: true,
+    transform: function(doc, ret) {
+      delete ret.password;
+      delete ret.temporaryPassword;
+      return ret;
+    }
+  }
 });
 
 // Virtual for application count
@@ -107,7 +121,8 @@ UserSchema.virtual('applicationCount').get(function() {
 
 // Password hashing middleware
 UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  // Only hash the password if it's modified and not a temporary password
+  if (!this.isModified('password') || this.isTemporaryPassword) return next();
   
   try {
     const salt = await bcrypt.genSalt(10);

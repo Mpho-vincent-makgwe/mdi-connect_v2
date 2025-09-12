@@ -3,7 +3,6 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import { sendInvitationEmail } from '@/lib/emailService';
 import { generateToken } from '@/lib/utils';
-import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
   await dbConnect();
@@ -31,7 +30,6 @@ export async function POST(request) {
     // Generate invitation token and temporary password
     const invitationToken = generateToken();
     const temporaryPassword = Math.random().toString(36).slice(-8); // 8-character random password
-    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
     
     const invitationExpires = new Date();
     invitationExpires.setDate(invitationExpires.getDate() + 7);
@@ -40,20 +38,24 @@ export async function POST(request) {
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: temporaryPassword, // Store as plain text temporarily
       role,
       invitedByAdmin: true,
       invitationToken,
       invitationExpires,
-      temporaryPassword: temporaryPassword // Store unencrypted for email (will be removed after sending)
+      temporaryPassword, // Store unencrypted for verification
+      isTemporaryPassword: true,
+      isActive: false
     });
 
     // Send invitation email with temporary password
     try {
       await sendInvitationEmail(email, name, invitationToken, temporaryPassword);
       
-      // Remove temporary password from database after sending email
-      await User.findByIdAndUpdate(user._id, { $unset: { temporaryPassword: 1 } });
+      // Update user to mark invitation as sent
+      await User.findByIdAndUpdate(user._id, { 
+        invitationSent: true 
+      });
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
       // Delete the user if email fails

@@ -31,7 +31,7 @@ api.interceptors.response.use(
       // Token expired or invalid
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        window.location.href = '/auth/login';
       }
     }
     return Promise.reject(error);
@@ -57,10 +57,17 @@ const apiHelper = {
       return response.data;
     } catch (error) {
       console.error('API request error:', error);
+      
+      // Provide more detailed error information
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Request failed';
+      
       return {
         success: false,
-        message: error.response?.data?.message || error.message || 'Request failed',
-        status: error.response?.status
+        message: errorMessage,
+        status: error.response?.status,
+        data: error.response?.data
       };
     }
   },
@@ -74,6 +81,14 @@ const apiHelper = {
     return apiHelper.request('POST', '/auth/register', userData);
   },
 
+  completeRegistration: async (data) => {
+    return apiHelper.request('POST', '/auth/complete-registration', data);
+  },
+
+  validateInvitation: async (token) => {
+    return apiHelper.request('GET', `/auth/validate-invitation?token=${token}`);
+  },
+
   getProfile: async () => {
     return apiHelper.request('GET', '/me');
   },
@@ -82,6 +97,7 @@ const apiHelper = {
     return apiHelper.request('PUT', '/me', updates);
   },
 
+  // ... rest of your API methods remain the same
   getApplications: async () => {
     return apiHelper.request('GET', '/applications');
   },
@@ -139,13 +155,9 @@ const apiHelper = {
     return apiHelper.request('GET', `/admin/jobs?${query}`);
   },
   
-  
   inviteUser: async (userData) => {
-  return apiHelper.request('POST', '/admin/users/invite', userData);
-},
-completeRegistration: async (data) => {
-  return apiHelper.request('POST', '/auth/complete-registration', data);
-},
+    return apiHelper.request('POST', '/admin/users/invite', userData);
+  },
 
   createJob: async (jobData) => {
     return apiHelper.request('POST', '/admin/jobs', jobData);
@@ -160,37 +172,36 @@ completeRegistration: async (data) => {
   },
 
   getAllApplications: async (filters = {}) => {
-  const query = new URLSearchParams(filters).toString();
-  const response = await apiHelper.request('GET', `/admin/applications?${query}`);
-  
-  // Ensure we return the proper structure
-  if (response.success) {
-    return {
-      ...response,
-      data: response.data // This should contain the applications array
-    };
-  }
-  return response;
-},
-
- getApplicationDetail: async (applicationId) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  return apiHelper.request('GET', `/admin/applications/${applicationId}`, {}, {
-    headers: { 
-      Authorization: `Bearer ${token}` 
+    const query = new URLSearchParams(filters).toString();
+    const response = await apiHelper.request('GET', `/admin/applications?${query}`);
+    
+    if (response.success) {
+      return {
+        ...response,
+        data: response.data
+      };
     }
-  });
-},
+    return response;
+  },
 
-updateApplicationStatus: async (applicationId, status) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  return apiHelper.request('PATCH', `/admin/applications/${applicationId}`, { status }, {
-    headers: { 
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-},
+  getApplicationDetail: async (applicationId) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('GET', `/admin/applications/${applicationId}`, {}, {
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+  },
+
+  updateApplicationStatus: async (applicationId, status) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return apiHelper.request('PATCH', `/admin/applications/${applicationId}`, { status }, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+  },
 
   getAllInterviews: async (filters = {}) => {
     const query = new URLSearchParams(filters).toString();

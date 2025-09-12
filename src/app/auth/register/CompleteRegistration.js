@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function CompleteRegistrationPage() {
-  const { updateUser } = useUser();
+  const { completeRegistration, validateInvitation, updateUser } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('token');
@@ -32,19 +32,18 @@ export default function CompleteRegistrationPage() {
       }
 
       try {
-        const response = await fetch(`/api/auth/validate-invitation?token=${invitationToken}`);
-        const data = await response.json();
+        const data = await validateInvitation(invitationToken);
         
         if (data.success) {
           setUserData(data.user);
           setFormData(prev => ({
             ...prev,
             email: data.user.email,
-            role: data.user.role
+            role: data.user.role || 'unskilled'
           }));
           setInvitationValid(true);
         } else {
-          setError('Invalid or expired invitation link');
+          setError(data.message || 'Invalid or expired invitation link');
         }
       } catch (err) {
         setError('Failed to validate invitation');
@@ -54,7 +53,7 @@ export default function CompleteRegistrationPage() {
     };
 
     checkInvitation();
-  }, [invitationToken]);
+  }, [invitationToken, validateInvitation]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,37 +87,22 @@ export default function CompleteRegistrationPage() {
     }
 
     try {
-      const response = await fetch('/api/auth/complete-registration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          invitationToken,
-          email: formData.email,
-          oldPassword: formData.oldPassword,
-          role: formData.role,
-          newPassword: formData.newPassword
-        }),
+      const result = await completeRegistration({
+        invitationToken,
+        email: formData.email,
+        oldPassword: formData.oldPassword,
+        role: formData.role,
+        newPassword: formData.newPassword
       });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Update user context
-        await updateUser({ completedQuestionnaire: true });
-        
-        // Redirect based on role
-        if (data.user.role === 'admin') {
-          router.push('/admin/dashboard');
-        } else {
-          router.push('/questionnaire');
-        }
+      
+      if (result && result.success) {
+        // Redirect to questionnaire after successful registration
+        router.push('/questionnaire');
       } else {
-        setError(data.message || 'Failed to complete registration');
+        setError(result?.message || 'Failed to complete registration');
       }
     } catch (err) {
-      setError('Failed to complete registration');
+      setError(err.message || 'Failed to complete registration');
     } finally {
       setLoading(false);
     }

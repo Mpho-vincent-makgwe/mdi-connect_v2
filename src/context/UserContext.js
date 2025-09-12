@@ -29,19 +29,16 @@ export function UserProvider({ children }) {
         // Redirect logic based on user role
         const currentPath = window.location.pathname;
         
-        // If user is admin and not on an admin page, redirect to admin dashboard
         if (response.user.role === 'admin' && !currentPath.startsWith('/admin')) {
           router.push('/admin/dashboard');
           return;
         }
         
-        // If user is not admin and on an admin page, redirect to home
         if (response.user.role !== 'admin' && currentPath.startsWith('/admin')) {
           router.push('/');
           return;
         }
         
-        // Redirect logic for questionnaire (only for non-admin users)
         if (response.user.role !== 'admin' && 
             !response.user.completedQuestionnaire && 
             !currentPath.includes('/questionnaire') &&
@@ -78,7 +75,6 @@ export function UserProvider({ children }) {
       localStorage.setItem('token', response.token);
       setUser(response.user);
       
-      // Redirect based on role
       if (response.user.role === 'admin') {
         router.push('/admin/dashboard');
       } else if (!response.user.completedQuestionnaire) {
@@ -114,6 +110,47 @@ export function UserProvider({ children }) {
     }
   };
 
+  const completeRegistration = async (invitationData) => {
+    try {
+      const response = await apiHelper.completeRegistration(invitationData);
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Registration completion failed');
+      }
+      
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+      }
+      
+      setUser(response.user);
+      
+      if (response.user.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/questionnaire');
+      }
+      
+      toast.success('Registration completed successfully!');
+      return response.user;
+    } catch (error) {
+      toast.error(error.message || 'Registration completion failed');
+      throw error;
+    }
+  };
+
+  const validateInvitation = async (token) => {
+    try {
+      const response = await apiHelper.validateInvitation(token);
+      return response;
+    } catch (error) {
+      console.error('Error validating invitation:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to validate invitation'
+      };
+    }
+  };
+
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setUser(null);
@@ -142,6 +179,8 @@ export function UserProvider({ children }) {
     loading,
     login,
     register,
+    completeRegistration,
+    validateInvitation,
     logout,
     updateUser,
     refreshUser: fetchUser,
