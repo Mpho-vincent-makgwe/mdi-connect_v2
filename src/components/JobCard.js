@@ -1,4 +1,4 @@
-// components/JobCard.js
+// components/JobCard.js (fixed)
 'use client';
 
 import { useState } from 'react';
@@ -9,12 +9,31 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { FiEdit2, FiCalendar, FiMapPin, FiDollarSign, FiUsers } from 'react-icons/fi';
 import JobApplicationModal from './JobApplicationModal';
+import { useRouter } from 'next/navigation';
 
-export default function JobCard({ job, onEdit, onDelete, onStatusChange }) {
-  const { user } = useUser();
+export default function JobCard({ job, onEdit, onStatusChange }) {
+  const { user, loading, isAuthenticated } = useUser();
+  const router = useRouter();
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
+  
+  // Check if user data is still loading
+  if (loading) {
+    return (
+      <Card className="overflow-hidden">
+        <div className="animate-pulse">
+          <div className="h-48 bg-gray-200"></div>
+          <CardContent className="space-y-4 p-6">
+            <div className="h-6 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          </CardContent>
+        </div>
+      </Card>
+    );
+  }
+
   const isAdmin = user?.role === 'admin';
-  const isUser = user?.role === 'user';
+  const isRegularUser = user?.role === 'user';
   const hasApplied = job.applications?.some(app => app.user === user?._id);
 
   // Calculate application progress
@@ -31,6 +50,10 @@ export default function JobCard({ job, onEdit, onDelete, onStatusChange }) {
 
   // Check if job is expired
   const isExpired = new Date(job.deadline) < new Date();
+
+  const handleLoginRedirect = () => {
+    router.push('/auth/login');
+  };
 
   return (
     <>
@@ -148,7 +171,7 @@ export default function JobCard({ job, onEdit, onDelete, onStatusChange }) {
                 View Applications ({job.applications?.length || 0})
               </Button>
             </div>
-          ) : isUser ? (
+          ) : isRegularUser ? (
             <div className="w-full">
               {hasApplied ? (
                 <Button variant="outline" className="w-full" disabled>
@@ -169,7 +192,7 @@ export default function JobCard({ job, onEdit, onDelete, onStatusChange }) {
             </div>
           ) : (
             <Button 
-              onClick={() => {/* Navigate to login */}}
+              onClick={handleLoginRedirect}
               variant="outline"
               className="w-full"
             >
@@ -180,7 +203,7 @@ export default function JobCard({ job, onEdit, onDelete, onStatusChange }) {
       </Card>
 
       {/* Application Modal */}
-      {isUser && (
+      {isRegularUser && (
         <JobApplicationModal
           job={job}
           open={applicationModalOpen}
