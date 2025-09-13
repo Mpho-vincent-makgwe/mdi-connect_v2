@@ -1,4 +1,3 @@
-// Questionnaire.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,6 +30,7 @@ export default function Questionnaire() {
     currentlyStudying: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -61,36 +61,62 @@ export default function Questionnaire() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setValidationError(''); // Clear validation error when user makes a change
   };
 
   const handleSelectChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+    setValidationError(''); // Clear validation error when user makes a change
+  };
+
+  const validateStep = () => {
+    switch (step) {
+      case 1:
+        if (!formData.sector) {
+          setValidationError('Please select a sector');
+          return false;
+        }
+        break;
+      case 2:
+        if (!formData.experience) {
+          setValidationError('Please select your experience');
+          return false;
+        }
+        if (formData.experience === 'yes' && !formData.yearsOfExperience) {
+          setValidationError('Please enter years of experience');
+          return false;
+        }
+        break;
+      case 3:
+        if (!formData.qualifications) {
+          setValidationError('Please select your qualifications');
+          return false;
+        }
+        break;
+      case 4:
+        if (!formData.educationLevel) {
+          setValidationError('Please select your education level');
+          return false;
+        }
+        break;
+      case 5:
+        if (!formData.currentlyStudying) {
+          setValidationError('Please select your current study status');
+          return false;
+        }
+        break;
+      default:
+        break;
+    }
+    return true;
   };
 
   const nextStep = () => {
-    let isValid = true;
-    
-    if (step === 1 && !formData.sector) {
-      isValid = false;
-      alert('Please select a sector');
-    } else if (step === 2 && !formData.experience) {
-      isValid = false;
-      alert('Please select your experience');
-    } else if (step === 3 && !formData.qualifications) {
-      isValid = false;
-      alert('Please select your qualifications');
-    } else if (step === 4 && !formData.educationLevel) {
-      isValid = false;
-      alert('Please select your education level');
-    } else if (step === 5 && !formData.currentlyStudying) {
-      isValid = false;
-      alert('Please select your current study status');
-    }
-
-    if (isValid) {
+    if (validateStep()) {
       const newProgress = Math.min(progress + 20, 100);
       setProgress(newProgress);
       setStep(step + 1);
+      setValidationError('');
     }
   };
 
@@ -98,9 +124,12 @@ export default function Questionnaire() {
     const newProgress = Math.max(progress - 20, 0);
     setProgress(newProgress);
     setStep(step - 1);
+    setValidationError('');
   };
 
   const handleSubmit = async () => {
+    if (!validateStep()) return;
+    
     setIsSubmitting(true);
     try {
       const userType = formData.qualifications === 'yes' ? 'skilled' : 'unskilled';
@@ -118,7 +147,7 @@ export default function Questionnaire() {
       }
     } catch (error) {
       console.error('Error submitting questionnaire:', error);
-      alert('Failed to submit questionnaire. Please try again.');
+      setValidationError('Failed to submit questionnaire. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +162,7 @@ export default function Questionnaire() {
       router.push('/dashboard');
     } catch (error) {
       console.error('Error saving progress:', error);
-      alert('Failed to save progress. Please try again.');
+      setValidationError('Failed to save progress. Please try again.');
     }
   };
 
@@ -143,7 +172,10 @@ export default function Questionnaire() {
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Which sector are you interested in?</h3>
-            <Select onValueChange={(value) => handleSelectChange('sector', value)}>
+            <Select 
+              onValueChange={(value) => handleSelectChange('sector', value)} 
+              value={formData.sector}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a sector" />
               </SelectTrigger>
@@ -161,6 +193,7 @@ export default function Questionnaire() {
             <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Do you have any professional experience?</h3>
             <RadioGroup 
               onValueChange={(value) => handleSelectChange('experience', value)}
+              value={formData.experience}
               style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -178,6 +211,7 @@ export default function Questionnaire() {
                 <Input 
                   type="number" 
                   name="yearsOfExperience" 
+                  value={formData.yearsOfExperience}
                   onChange={handleChange}
                   placeholder="Enter years of experience"
                 />
@@ -191,6 +225,7 @@ export default function Questionnaire() {
             <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Do you have any formal qualifications?</h3>
             <RadioGroup 
               onValueChange={(value) => handleSelectChange('qualifications', value)}
+              value={formData.qualifications}
               style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -208,7 +243,10 @@ export default function Questionnaire() {
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>What is your highest education level?</h3>
-            <Select onValueChange={(value) => handleSelectChange('educationLevel', value)}>
+            <Select 
+              onValueChange={(value) => handleSelectChange('educationLevel', value)}
+              value={formData.educationLevel}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select education level" />
               </SelectTrigger>
@@ -229,6 +267,7 @@ export default function Questionnaire() {
             <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#1A1A1A' }}>Are you currently enrolled in any educational program?</h3>
             <RadioGroup 
               onValueChange={(value) => handleSelectChange('currentlyStudying', value)}
+              value={formData.currentlyStudying}
               style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -274,11 +313,17 @@ export default function Questionnaire() {
         
         <Progress value={progress} style={{ height: '0.5rem' }} />
         
+        {validationError && (
+          <div style={{ color: 'red', textAlign: 'center' }}>
+            {validationError}
+          </div>
+        )}
+        
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {renderStep()}
         </div>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
           {step > 1 ? (
             <Button 
               variant="outline" 
@@ -292,36 +337,42 @@ export default function Questionnaire() {
               Back
             </Button>
           ) : (
-            <div></div>
+            <div style={{ width: '80px' }}></div> // Placeholder for spacing
           )}
-            <Button 
-              onClick={nextStep}
-              style={{
-                backgroundColor: '#132857',
-                color: '#F2ECE4'
-              }}
-            >
-              Next
-            </Button>
+          
           {step < 5 ? (
-            <Button 
-              onClick={handleSaveForLater}
-              style={{
-                backgroundColor: '#132857',
-                color: '#F2ECE4'
-              }}
-            >
-              Save for later
-            </Button>
+            <>
+              <Button 
+                onClick={nextStep}
+                style={{
+                  backgroundColor: '#132857',
+                  color: '#F2ECE4',
+                  flex: 1
+                }}
+              >
+                Next
+              </Button>
+              <Button 
+                onClick={handleSaveForLater}
+                style={{
+                  backgroundColor: '#8C3C1E',
+                  color: '#F2ECE4'
+                }}
+              >
+                Save for later
+              </Button>
+            </>
           ) : (
             <Button 
               onClick={handleSubmit}
+              disabled={isSubmitting}
               style={{
                 backgroundColor: '#132857',
-                color: '#F2ECE4'
+                color: '#F2ECE4',
+                flex: 1
               }}
             >
-              Complete Profile
+              {isSubmitting ? 'Completing...' : 'Complete Profile'}
             </Button>
           )}
         </div>
