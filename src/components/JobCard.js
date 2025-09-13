@@ -1,235 +1,192 @@
-// components/AdminDashboard/JobForm.js
+// components/JobCard.js
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser } from '@/context/UserContext';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import apiHelper from '@/lib/apiHelper';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { FiEdit2, FiCalendar, FiMapPin, FiDollarSign, FiUsers } from 'react-icons/fi';
+import JobApplicationModal from './JobApplicationModal';
 
-export default function JobForm({ job, onSuccess, onCancel }) {
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: job?.title || '',
-    company: job?.company || '',
-    sector: job?.sector || '',
-    location: job?.location || '',
-    salary: job?.salary || '',
-    description: job?.description || '',
-    requirements: job?.requirements ? job.requirements.join('\n') : '',
-    requiredApplicants: job?.requiredApplicants || 1,
-    deadline: job?.deadline ? new Date(job.deadline).toISOString().split('T')[0] : '',
-    status: job?.status || 'Open',
-    img: job?.img || '' // Add image field
-  });
+export default function JobCard({ job, onEdit, onDelete, onStatusChange }) {
+  const { user } = useUser();
+  const [applicationModalOpen, setApplicationModalOpen] = useState(false);
+  const isAdmin = user?.role === 'admin';
+  const isUser = user?.role === 'user';
+  const hasApplied = job.applications?.some(app => app.user === user?._id);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  // Calculate application progress
+  const applicationProgress = Math.min(
+    (job.applications?.length || 0) / job.requiredApplicants * 100,
+    100
+  );
+
+  // Format deadline
+  const formatDeadline = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
   };
 
-  const handleSelectChange = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Convert requirements from text to array
-      const dataToSubmit = {
-        ...formData,
-        requirements: formData.requirements.split('\n').filter(req => req.trim() !== ''),
-        requiredApplicants: parseInt(formData.requiredApplicants),
-        deadline: new Date(formData.deadline).toISOString()
-      };
-
-      console.log('Submitting job data:', dataToSubmit); // Debug log
-
-      let response;
-      if (job) {
-        response = await apiHelper.updateJob(job._id, dataToSubmit);
-      } else {
-        response = await apiHelper.createJob(dataToSubmit);
-      }
-
-      if (response.success) {
-        onSuccess();
-      } else {
-        console.error('Failed to save job:', response.message);
-        alert(`Failed to save job: ${response.message}`);
-      }
-    } catch (error) {
-      console.error('Error saving job:', error);
-      alert('Error saving job. Please check the console for details.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Check if job is expired
+  const isExpired = new Date(job.deadline) < new Date();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{job ? 'Edit Job' : 'Create New Job'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Job Title *</Label>
-              <Input
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
-            </div>
+    <>
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+        {/* Header with image */}
+        <div className="relative h-48 overflow-hidden">
+          <img
+            src={job.img || '/images/default-job.jpg'}
+            alt={job.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute top-4 right-4">
+            <Badge 
+              variant={job.status === 'Open' && !isExpired ? 'default' : 'outline'}
+              className={job.status === 'Open' && !isExpired 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+              }
+            >
+              {job.status === 'Open' && !isExpired ? 'Open' : 'Closed'}
+            </Badge>
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="company">Company *</Label>
-              <Input
-                id="company"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-xl font-semibold text-gray-900">
+              {job.title}
+            </CardTitle>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(job)}
+                  className="h-8 w-8 p-0"
+                >
+                  <FiEdit2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+          <p className="text-lg font-medium text-blue-900">{job.company}</p>
+        </CardHeader>
 
+        <CardContent className="space-y-3">
+          {/* Job details */}
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-1">
+              <FiMapPin className="h-4 w-4" />
+              <span>{job.location}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <FiDollarSign className="h-4 w-4" />
+              <span>{job.salary}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <FiCalendar className="h-4 w-4" />
+              <span>Apply by: {formatDeadline(job.deadline)}</span>
+            </div>
+          </div>
+
+          {/* Sector */}
+          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+            {job.sector}
+          </Badge>
+
+          {/* Description preview */}
+          <p className="text-sm text-gray-600 line-clamp-2">
+            {job.description}
+          </p>
+
+          {/* Admin-specific content */}
+          {isAdmin && (
             <div className="space-y-2">
-              <Label htmlFor="sector">Sector *</Label>
-              <Select
-                value={formData.sector}
-                onValueChange={(value) => handleSelectChange('sector', value)}
-                required
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-1 text-gray-600">
+                  <FiUsers className="h-4 w-4" />
+                  Applications: {job.applications?.length || 0} / {job.requiredApplicants}
+                </span>
+              </div>
+              <Progress value={applicationProgress} className="h-2" />
+            </div>
+          )}
+
+          {/* Requirements preview */}
+          <div className="text-sm">
+            <p className="font-medium text-gray-900">Key Requirements:</p>
+            <ul className="text-gray-600 list-disc list-inside">
+              {job.requirements.slice(0, 2).map((req, index) => (
+                <li key={index} className="truncate">{req}</li>
+              ))}
+              {job.requirements.length > 2 && (
+                <li className="text-blue-600">+{job.requirements.length - 2} more</li>
+              )}
+            </ul>
+          </div>
+        </CardContent>
+
+        <CardFooter>
+          {isAdmin ? (
+            <div className="flex gap-2 w-full">
+              <Button
+                variant="outline"
+                onClick={() => onStatusChange(job._id, job.status === 'Open' ? 'Closed' : 'Open')}
+                className="flex-1"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sector" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Mining">Mining</SelectItem>
-                  <SelectItem value="Tourism">Tourism</SelectItem>
-                  <SelectItem value="Manufacturing">Manufacturing</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="location">Location *</Label>
-              <Input
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="salary">Salary *</Label>
-              <Input
-                id="salary"
-                name="salary"
-                value={formData.salary}
-                onChange={handleChange}
-                placeholder="e.g., $50,000 - $70,000"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="requiredApplicants">Required Applicants *</Label>
-              <Input
-                id="requiredApplicants"
-                name="requiredApplicants"
-                type="number"
-                min="1"
-                value={formData.requiredApplicants}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="deadline">Application Deadline *</Label>
-              <Input
-                id="deadline"
-                name="deadline"
-                type="date"
-                value={formData.deadline}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleSelectChange('status', value)}
+                {job.status === 'Open' ? 'Close Job' : 'Reopen Job'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {/* Navigate to applications */}}
+                className="flex-1"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Open">Open</SelectItem>
-                  <SelectItem value="Closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
+                View Applications ({job.applications?.length || 0})
+              </Button>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="img">Image URL *</Label>
-              <Input
-                id="img"
-                name="img"
-                value={formData.img}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                required
-              />
+          ) : isUser ? (
+            <div className="w-full">
+              {hasApplied ? (
+                <Button variant="outline" className="w-full" disabled>
+                  Already Applied
+                </Button>
+              ) : job.status === 'Open' && !isExpired ? (
+                <Button 
+                  onClick={() => setApplicationModalOpen(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  Apply Now
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full" disabled>
+                  Applications Closed
+                </Button>
+              )}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Job Description *</Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="requirements">Requirements * (one per line)</Label>
-            <Textarea
-              id="requirements"
-              name="requirements"
-              value={formData.requirements}
-              onChange={handleChange}
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+          ) : (
+            <Button 
+              onClick={() => {/* Navigate to login */}}
+              variant="outline"
+              className="w-full"
+            >
+              Login to Apply
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : job ? 'Update Job' : 'Create Job'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          )}
+        </CardFooter>
+      </Card>
+
+      {/* Application Modal */}
+      {isUser && (
+        <JobApplicationModal
+          job={job}
+          open={applicationModalOpen}
+          onOpenChange={setApplicationModalOpen}
+        />
+      )}
+    </>
   );
 }

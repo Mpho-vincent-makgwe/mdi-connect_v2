@@ -18,7 +18,7 @@ const createTransporter = () => {
 };
 
 export const sendInvitationEmail = async (email, name, token, temporaryPassword) => {
-  const registrationLink = `${process.env.NEXTAUTH_URL || 'https://mdi-connect-v2.vercel.app/auth/complete-registration'}?token=${token}`;
+  const registrationLink = `${process.env.NEXTAUTH_URL || 'https://mdi-connect-v2.vercel.app/auth/register'}?token=${token}`;
   
   const mailOptions = {
     from: {
