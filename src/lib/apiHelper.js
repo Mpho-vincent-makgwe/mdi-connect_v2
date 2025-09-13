@@ -58,7 +58,6 @@ const apiHelper = {
     } catch (error) {
       console.error('API request error:', error);
       
-      // Provide more detailed error information
       const errorMessage = error.response?.data?.message || 
                           error.message || 
                           'Request failed';
@@ -85,8 +84,18 @@ const apiHelper = {
     return apiHelper.request('POST', '/auth/complete-registration', data);
   },
 
+  // In your apiHelper.js
   validateInvitation: async (token) => {
-    return apiHelper.request('GET', `/auth/validate-invitation?token=${token}`);
+    try {
+      const response = await apiHelper.request('GET', `/auth/validate-invitation?token=${token}`);
+      return response;
+    } catch (error) {
+      console.error('Error validating invitation:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to validate invitation'
+      };
+    }
   },
 
   getProfile: async () => {

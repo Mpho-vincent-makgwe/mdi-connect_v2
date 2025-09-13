@@ -9,7 +9,8 @@ export async function POST(request) {
   
   try {
     const { email, password } = await request.json();
-    console.log(`Password and email from front end${password}${email}`)
+    console.log(`Login attempt for: ${email}`);
+    
     if (!email || !password) {
       return NextResponse.json(
         { success: false, message: 'Email and password are required' },
@@ -19,14 +20,31 @@ export async function POST(request) {
 
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
+      console.log('User not found');
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401 }
       );
     }
-    const isMatch6 = await bcrypt.compare(password, user.password);
-    console.log("is match? :", isMatch6);
-    if (!isMatch6) {
+    
+    console.log('User found:', user.email);
+    console.log('User has password:', !!user.password);
+    console.log('User is active:', user.isActive);
+    
+    // Check if user is active (only if you have this field)
+    if (user.isActive === false) {
+      console.log('User account not active');
+      return NextResponse.json(
+        { success: false, message: 'Account not activated' },
+        { status: 401 }
+      );
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match result:", isMatch);
+    
+    if (!isMatch) {
+      console.log('Password does not match');
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401 }
@@ -41,6 +59,8 @@ export async function POST(request) {
 
     const userData = user.toObject();
     delete userData.password;
+    
+    console.log('Login successful');
     
     return NextResponse.json({
       success: true,

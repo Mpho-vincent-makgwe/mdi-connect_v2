@@ -110,33 +110,34 @@ export function UserProvider({ children }) {
     }
   };
 
-  const completeRegistration = async (invitationData) => {
-    try {
-      const response = await apiHelper.completeRegistration(invitationData);
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Registration completion failed');
-      }
-      
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-      }
-      
-      setUser(response.user);
-      
-      if (response.user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/questionnaire');
-      }
-      
-      toast.success('Registration completed successfully!');
-      return response.user;
-    } catch (error) {
-      toast.error(error.message || 'Registration completion failed');
-      throw error;
+  // In your UserContext
+const completeRegistration = async (invitationData) => {
+  try {
+    const response = await apiHelper.completeRegistration(invitationData);
+    
+    if (!response.success) {
+      throw new Error(response.message || 'Registration completion failed');
     }
-  };
+    
+    if (response.token) {
+      localStorage.setItem('token', response.token);
+    }
+    
+    setUser(response.user);
+    
+    if (response.user.role === 'admin') {
+      router.push('/admin/dashboard');
+    } else {
+      router.push('/questionnaire');
+    }
+    
+    toast.success('Registration completed successfully!');
+    return response.user;
+  } catch (error) {
+    toast.error(error.message || 'Registration completion failed');
+    throw error;
+  }
+};
 
   const validateInvitation = async (token) => {
     try {

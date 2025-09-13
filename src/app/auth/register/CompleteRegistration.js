@@ -1,3 +1,4 @@
+// app/auth/complete-registration/page.js
 'use client';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
@@ -5,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function CompleteRegistrationPage() {
-  const { completeRegistration, validateInvitation, updateUser } = useUser();
+  const { completeRegistration, validateInvitation } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const invitationToken = searchParams.get('token');
@@ -28,25 +29,27 @@ export default function CompleteRegistrationPage() {
     const checkInvitation = async () => {
       if (!invitationToken) {
         setInvitationLoading(false);
+        setError('No invitation token found in the URL.');
         return;
       }
 
       try {
-        const data = await validateInvitation(invitationToken);
+        const response = await validateInvitation(invitationToken);
         
-        if (data.success) {
-          setUserData(data.user);
+        if (response.success) {
+          setUserData(response.user);
           setFormData(prev => ({
             ...prev,
-            email: data.user.email,
-            role: data.user.role || 'unskilled'
+            email: response.user.email,
+            role: response.user.role || 'unskilled'
           }));
           setInvitationValid(true);
         } else {
-          setError(data.message || 'Invalid or expired invitation link');
+          setError(response.message || 'Invalid or expired invitation link');
         }
       } catch (err) {
         setError('Failed to validate invitation');
+        console.error('Invitation validation error:', err);
       } finally {
         setInvitationLoading(false);
       }
@@ -66,8 +69,15 @@ export default function CompleteRegistrationPage() {
     setError('');
 
     // Validate all required fields
-    if (!formData.email || !formData.oldPassword || !formData.newPassword) {
+    if (!formData.email || !formData.oldPassword || !formData.newPassword || !formData.confirmPassword) {
       setError('All fields are required');
+      setLoading(false);
+      return;
+    }
+
+    // Validate invitation token is present
+    if (!invitationToken) {
+      setError('Invitation token is missing');
       setLoading(false);
       return;
     }
@@ -120,8 +130,8 @@ export default function CompleteRegistrationPage() {
     );
   }
 
-  // Show error if invitation is invalid
-  if (invitationToken && !invitationValid) {
+  // Show error if no invitation token or invitation is invalid
+  if (!invitationToken || (invitationToken && !invitationValid)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
@@ -176,7 +186,7 @@ export default function CompleteRegistrationPage() {
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your email"
-                disabled={!!userData} // Disable if email is pre-filled from invitation
+                disabled={!!userData}
               />
             </div>
 
@@ -231,7 +241,7 @@ export default function CompleteRegistrationPage() {
                 value={formData.newPassword}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter new password"
+                placeholder="Enter new password (min. 6 characters)"
               />
             </div>
 

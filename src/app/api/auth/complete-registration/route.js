@@ -1,3 +1,4 @@
+// app/api/auth/complete-registration/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
@@ -7,85 +8,107 @@ import jwt from 'jsonwebtoken';
 export async function POST(request) {
   try {
     await dbConnect();
-    
+
     const { invitationToken, email, oldPassword, role, newPassword } = await request.json();
-    console.log('Received data:', { email, hasOldPassword: !!oldPassword, hasNewPassword: !!newPassword, role });
+
+    console.log('Received complete registration request:', { 
+      email, 
+      hasInvitationToken: !!invitationToken, 
+      hasOldPassword: !!oldPassword, 
+      hasNewPassword: !!newPassword, 
+      role 
+    });
 
     // Validate required fields
-    if (!email || !oldPassword || !newPassword) {
-      console.log('Missing required fields');
-      return NextResponse.json(
-        { success: false, message: 'All fields are required' },
-        { status: 400 }
-      );
+    if (!email || !oldPassword || !newPassword || !invitationToken) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Email, invitation token, old password and new password are required' 
+      }, { status: 400 });
     }
 
-    // Find user by email - explicitly include temporaryPassword
-    const user = await User.findOne({ email }).select('+temporaryPassword');
+    // Find user by email and include the sensitive fields needed for verification
+    const user = await User.findOne({ email, invitationToken })
+      .select('+password +temporaryPassword +invitationToken +invitationExpires +isTemporaryPassword');
+
     if (!user) {
-      console.log('User not found:', email);
-      return NextResponse.json(
-        { success: false, message: 'User not found' },
-        { status: 400 }
-      );
+      return NextResponse.json({ 
+        success: false, 
+        message: 'User not found or invalid invitation token' 
+      }, { status: 400 });
     }
 
-    console.log('User found:', user.email);
-    console.log('Has temporary password:', !!user.temporaryPassword);
-    console.log('Is temporary password flag:', user.isTemporaryPassword);
-    console.log('User object:', JSON.stringify(user, null, 2));
-    console.log("Input old password:", oldPassword);
-    console.log("Stored temporary password:", user.temporaryPassword);
+    // Ensure invitation token matches and is not expired
+    if (!user.invitationToken || user.invitationToken !== invitationToken) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Invalid invitation token' 
+      }, { status: 400 });
+    }
 
-    // Check if user has a temporary password and it matches
+    if (user.invitationExpires && user.invitationExpires < new Date()) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Invitation has expired' 
+      }, { status: 400 });
+    }
+
+    // Verify the password - either temporary (hashed) or the existing password (hashed)
     let isPasswordValid = false;
-    
-    if (user.temporaryPassword && user.isTemporaryPassword) {
-      // Compare with stored temporary password (plain text)
-      isPasswordValid = oldPassword === user.temporaryPassword;
-      console.log("Temporary password match result:", isPasswordValid);
+
+    // If user has a hashed temporary password and isTemporaryPassword flag set
+    if (user.isTemporaryPassword && user.temporaryPassword) {
+      isPasswordValid = await bcrypt.compare(oldPassword, user.temporaryPassword);
+      console.log('Temporary password validation result:', isPasswordValid);
     }
-    
-    // If temporary password didn't match or doesn't exist, try bcrypt with the actual password
+
+    // If not valid yet and a regular password exists, try comparing with it
     if (!isPasswordValid && user.password) {
       isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-      console.log("Hashed password match result:", isPasswordValid);
+      console.log('Regular password validation result:', isPasswordValid);
     }
-    
+
     if (!isPasswordValid) {
-      console.log('Invalid password for user:', email);
-      return NextResponse.json(
-        { success: false, message: 'Invalid temporary password' },
-        { status: 400 }
-      );
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Invalid temporary password' 
+      }, { status: 400 });
     }
 
     // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update user with new password and mark as active
-    user.password = hashedPassword;
-    user.role = role || user.role;
+    // Apply updates
+    user.password = hashedNewPassword;
+    if (role) user.role = role;
     user.isActive = true;
+
+    // Clear invitation fields
     user.invitationToken = undefined;
     user.invitationExpires = undefined;
-    user.temporaryPassword = undefined; // Remove temporary password
-    user.isTemporaryPassword = false;   // Remove temporary flag
-    user.completedQuestionnaire = false; // Reset questionnaire status
+    user.temporaryPassword = undefined;
+    user.isTemporaryPassword = false;
+    user.invitationSent = true;
 
     await user.save();
-    console.log('User updated successfully:', user.email);
 
     // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '1d' }
-    );
+    if (!process.env.JWT_SECRET) {
+      console.warn('JWT_SECRET not set. Returning user without token.');
+    }
+    const token = process.env.JWT_SECRET ? jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' }) : null;
 
-    const userData = user.toObject();
-    delete userData.password;
-    delete userData.temporaryPassword;
+    // Prepare user object for response
+    const userData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      completedQuestionnaire: user.completedQuestionnaire,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
 
     return NextResponse.json({
       success: true,
@@ -93,12 +116,12 @@ export async function POST(request) {
       token,
       user: userData
     });
-
   } catch (error) {
     console.error('Complete registration error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Internal server error', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Internal server error', 
+      error: error.message 
+    }, { status: 500 });
   }
 }
