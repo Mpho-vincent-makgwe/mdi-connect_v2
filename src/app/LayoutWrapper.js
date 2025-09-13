@@ -89,8 +89,7 @@ function ProtectedLayout({ children }) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {!hideLayout && user?.role !== 'admin' && <Sidebar />}
-      {!hideLayout && user?.role === 'admin' && <AdminSidebar />} {/* You'll need to create an AdminSidebar component */}
+      {!hideLayout && <Sidebar />}
       <div className={`flex-1 flex flex-col overflow-hidden ${!hideLayout && user?.role !== 'admin' ? 'lg:ml-64' : ''}`}>
         {!hideLayout && <Navbar />}
         <main className={`flex-1 overflow-y-auto ${!hideLayout ? 'p-6 mt-16' : 'p-0'}`}>
