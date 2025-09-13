@@ -1,4 +1,4 @@
-// components/JobCard.js (fixed)
+// components/JobCard.js
 'use client';
 
 import { useState } from 'react';
@@ -12,7 +12,7 @@ import JobApplicationModal from './JobApplicationModal';
 import { useRouter } from 'next/navigation';
 
 export default function JobCard({ job, onEdit, onStatusChange }) {
-  const { user, loading, isAuthenticated } = useUser();
+  const { user, loading } = useUser();
   const router = useRouter();
   const [applicationModalOpen, setApplicationModalOpen] = useState(false);
   
@@ -33,7 +33,6 @@ export default function JobCard({ job, onEdit, onStatusChange }) {
   }
 
   const isAdmin = user?.role === 'admin';
-  const isRegularUser = user?.role === 'user';
   const hasApplied = job.applications?.some(app => app.user === user?._id);
 
   // Calculate application progress
@@ -55,9 +54,27 @@ export default function JobCard({ job, onEdit, onStatusChange }) {
     router.push('/auth/login');
   };
 
+  // Handle card click to navigate to job details
+  const handleCardClick = (e) => {
+    // Prevent navigation if user clicked on a button or admin edit icon
+    if (e.target.closest('button') || e.target.closest('a')) {
+      return;
+    }
+    router.push(`/jobs/${job.id}`);
+  };
+
+  // Handle button clicks to prevent card click event
+  const handleButtonClick = (e, callback) => {
+    e.stopPropagation();
+    if (callback) callback();
+  };
+
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={handleCardClick}
+      >
         {/* Header with image */}
         <div className="relative h-48 overflow-hidden">
           <img
@@ -88,7 +105,7 @@ export default function JobCard({ job, onEdit, onStatusChange }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onEdit(job)}
+                  onClick={(e) => handleButtonClick(e, () => onEdit(job))}
                   className="h-8 w-8 p-0"
                 >
                   <FiEdit2 className="h-4 w-4" />
@@ -158,41 +175,51 @@ export default function JobCard({ job, onEdit, onStatusChange }) {
             <div className="flex gap-2 w-full">
               <Button
                 variant="outline"
-                onClick={() => onStatusChange(job._id, job.status === 'Open' ? 'Closed' : 'Open')}
+                onClick={(e) => handleButtonClick(e, () => onStatusChange(job._id, job.status === 'Open' ? 'Closed' : 'Open'))}
                 className="flex-1"
               >
                 {job.status === 'Open' ? 'Close Job' : 'Reopen Job'}
               </Button>
               <Button
                 variant="outline"
-                onClick={() => {/* Navigate to applications */}}
+                onClick={(e) => handleButtonClick(e, () => {/* Navigate to applications */})}
                 className="flex-1"
               >
                 View Applications ({job.applications?.length || 0})
               </Button>
             </div>
-          ) : isRegularUser ? (
+          ) : user ? ( // If user is logged in and not admin
             <div className="w-full">
               {hasApplied ? (
-                <Button variant="outline" className="w-full" disabled>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  disabled
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Already Applied
                 </Button>
               ) : job.status === 'Open' && !isExpired ? (
                 <Button 
-                  onClick={() => setApplicationModalOpen(true)}
+                  onClick={(e) => handleButtonClick(e, () => setApplicationModalOpen(true))}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   Apply Now
                 </Button>
               ) : (
-                <Button variant="outline" className="w-full" disabled>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  disabled
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Applications Closed
                 </Button>
               )}
             </div>
-          ) : (
+          ) : ( // If user is not logged in
             <Button 
-              onClick={handleLoginRedirect}
+              onClick={(e) => handleButtonClick(e, handleLoginRedirect)}
               variant="outline"
               className="w-full"
             >
@@ -202,8 +229,8 @@ export default function JobCard({ job, onEdit, onStatusChange }) {
         </CardFooter>
       </Card>
 
-      {/* Application Modal */}
-      {isRegularUser && (
+      {/* Application Modal - Show for all logged-in non-admin users */}
+      {user && !isAdmin && (
         <JobApplicationModal
           job={job}
           open={applicationModalOpen}

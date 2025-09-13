@@ -12,7 +12,7 @@ export function JobsProvider({ children }) {
     appliedJobs: [],
     loading: true,
     error: null,
-    currentJob: null
+    jobDetails: null
   });
 
   const fetchAppliedJobs = useCallback(async () => {
@@ -111,6 +111,32 @@ export function JobsProvider({ children }) {
       return { success: false, message: err.message };
     }
   }, [fetchAppliedJobs]);
+  // In your JobsContext.js
+const fetchJobDetails = useCallback(async (jobId) => {
+  setState(prev => ({ ...prev, loading: true, error: null }));
+  
+  try {
+    const response = await apiHelper.getJobDetails(jobId);
+    
+    if (response.success) {
+      setState(prev => ({
+        ...prev,
+        jobDetails: response.data,
+        loading: false,
+        error: null
+      }));
+    } else {
+      throw new Error(response.message || 'Failed to fetch job details');
+    }
+  } catch (err) {
+    console.error('Error fetching job details:', err);
+    setState(prev => ({
+      ...prev,
+      loading: false,
+      error: err.message || 'Failed to fetch job details'
+    }));
+  }
+}, []);
 
   const hasAppliedToJob = useCallback((jobId) => {
     if (!jobId) return false;
@@ -121,14 +147,15 @@ export function JobsProvider({ children }) {
     <JobsContext.Provider value={{
       jobs: state.jobs,
       appliedJobs: state.appliedJobs,
-      currentJob: state.currentJob,
+      jobDetails: state.jobDetails,
       loading: state.loading,
       error: state.error,
       fetchJobs,
       applyForJob,
       fetchAppliedJobs,
       fetchInterviews,
-      hasAppliedToJob
+      hasAppliedToJob,
+      fetchJobDetails
     }}>
       {children}
     </JobsContext.Provider>

@@ -1,4 +1,4 @@
-// JobDetailsPage.js
+// In your JobDetailsPage.js
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -8,26 +8,50 @@ import { Button } from '@/components/ui/button';
 import JobApplicationModal from '@/components/JobApplicationModal';
 import { FiArrowLeft } from 'react-icons/fi';
 import JobDetailsLoading from '@/components/JobDetailsLoading';
+import apiHelper from '@/lib/apiHelper';
 
 export default function JobDetailsPage({ params }) {
   const { id } = use(params);
-  const { currentJob, loading, error, fetchJobDetails, hasAppliedToJob } = useJobs();
+  const { hasAppliedToJob } = useJobs(); // Only use what you need from context
+  const [jobDetails, setJobDetails] = useState(null); // Uncomment this line
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [applicationOpen, setApplicationOpen] = useState(false);
   const router = useRouter();
 
   const hasApplied = hasAppliedToJob(id);
 
   useEffect(() => {
-    if (id) {
-      fetchJobDetails(id);
-    }
-  }, [id, fetchJobDetails]);
+    const fetchJobDetails = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      setErrorMessage(null);
+      
+      try {
+        const response = await apiHelper.getJobDetails(id);
+        
+        if (response.success) {
+          setJobDetails(response.data);
+        } else {
+          setErrorMessage(response.message || 'Failed to fetch job details');
+        }
+      } catch (err) {
+        console.error('Error fetching job details:', err);
+        setErrorMessage(err.message || 'Failed to fetch job details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (loading) {
+    fetchJobDetails();
+  }, [id]);
+
+  if (isLoading) {
     return <JobDetailsLoading />;
   }
 
-  if (error) {
+  if (errorMessage) {
     return (
       <div style={{
         padding: '1.5rem',
@@ -36,7 +60,7 @@ export default function JobDetailsPage({ params }) {
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         textAlign: 'center'
       }}>
-        <p style={{ color: '#8B0000' }}>{error}</p>
+        <p style={{ color: '#8B0000' }}>{errorMessage}</p>
         <Button 
           variant="ghost" 
           style={{
@@ -45,7 +69,7 @@ export default function JobDetailsPage({ params }) {
             color: '#8C3C1E',
             backgroundColor: 'transparent'
           }}
-          onClick={() => fetchJobDetails(id)}
+          onClick={() => window.location.reload()}
         >
           Retry
         </Button>
@@ -53,7 +77,7 @@ export default function JobDetailsPage({ params }) {
     );
   }
 
-  if (!currentJob) {
+  if (!jobDetails) {
     return (
       <div style={{
         padding: '1.5rem',
@@ -108,15 +132,15 @@ export default function JobDetailsPage({ params }) {
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
                 color: '#1A1A1A'
-              }}>{currentJob.title}</h1>
+              }}>{jobDetails.title}</h1>
               <p style={{
                 fontSize: '1.125rem',
                 color: 'rgba(140, 60, 30, 0.7)'
-              }}>{currentJob.company}</p>
+              }}>{jobDetails.company}</p>
             </div>
             <img 
-              src={currentJob.img} 
-              alt={currentJob.company} 
+              src={jobDetails.img} 
+              alt={jobDetails.company} 
               style={{
                 height: '4rem',
                 width: '4rem',
@@ -147,7 +171,7 @@ export default function JobDetailsPage({ params }) {
                 <p style={{
                   color: 'rgba(140, 60, 30, 0.8)',
                   whiteSpace: 'pre-line'
-                }}>{currentJob.description}</p>
+                }}>{jobDetails.description}</p>
               </div>
               
               <div>
@@ -165,7 +189,7 @@ export default function JobDetailsPage({ params }) {
                   gap: '0.25rem',
                   color: 'rgba(140, 60, 30, 0.8)'
                 }}>
-                  {currentJob.requirements.map((req, i) => (
+                  {jobDetails.requirements.map((req, i) => (
                     <li key={i}>{req}</li>
                   ))}
                 </ul>
@@ -195,19 +219,19 @@ export default function JobDetailsPage({ params }) {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'rgba(140, 60, 30, 0.7)' }}>Location:</span>
-                    <span>{currentJob.loc}</span>
+                    <span>{jobDetails.loc}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'rgba(140, 60, 30, 0.7)' }}>Sector:</span>
-                    <span>{currentJob.sector}</span>
+                    <span>{jobDetails.sector}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'rgba(140, 60, 30, 0.7)' }}>Salary:</span>
-                    <span>{currentJob.salary}</span>
+                    <span>{jobDetails.salary}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'rgba(140, 60, 30, 0.7)' }}>Deadline:</span>
-                    <span>{new Date(currentJob.deadline).toLocaleDateString()}</span>
+                    <span>{new Date(jobDetails.deadline).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -245,7 +269,7 @@ export default function JobDetailsPage({ params }) {
       </div>
 
       <JobApplicationModal 
-        job={currentJob}
+        job={jobDetails}
         open={applicationOpen}
         onOpenChange={setApplicationOpen}
       />

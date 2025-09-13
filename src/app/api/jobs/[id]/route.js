@@ -1,6 +1,7 @@
+// src/app/api/jobs/[id]/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import mongoose from 'mongoose'; // Add this import
+import mongoose from 'mongoose';
 import Job from '@/models/Job';
 import User from '@/models/User';
 import Application from '@/models/Application';
@@ -13,7 +14,8 @@ export async function GET(request, { params }) {
   await dbConnect();
   
   try {
-    const { id } = params;
+    // Await the params object before destructuring
+    const { id } = await params;
     
     const job = await Job.findById(id)
       .select('-applications')
@@ -52,10 +54,13 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function POST(request,  {params}) {
+export async function POST(request, { params }) {
   await dbConnect();
   
   try {
+    // Await the params object before destructuring
+    const { id } = await params;
+    
     // 1. Authentication and Authorization
     const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token) {
@@ -71,7 +76,6 @@ export async function POST(request,  {params}) {
 
     // 2. Parse form data
     const formData = await request.formData();
-     const { id } = params;
     const resumeFile = formData.get('resume');
     const name = formData.get('name');
     const email = formData.get('email');
@@ -94,6 +98,7 @@ export async function POST(request,  {params}) {
       );
     }
 
+    // ... rest of your POST function remains the same ...
     // 4. Process the resume file
     let resumeUrl;
     try {
